@@ -1,0 +1,1615 @@
+---
+title: "Astrocyte intron retention manuscript figures"
+author: "Oliver Ziff"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_document:
+    fig_width: 7
+    fig_height: 7
+    toc_depth: 3
+    theme: simplex
+    dev: jpeg
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+.libPaths("/camp/lab/luscomben/home/users/ziffo/.conda/envs/rtest/lib/R/library")
+source("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/scripts/irfinder_functions.R")
+
+# Import pooled replicate quantified IRFinder Output for each condition i.e. not differentially compared (IRFinder-IR-dir.txt or if not stranded, then IRFinder-IR-nondir.txt or )
+ac_who_ctrl.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/pooled_ac_who_ctrl/IRFinder-IR-dir.txt", sep = '\t',header = TRUE)
+ac_who_vcp.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/pooled_ac_who_vcp/IRFinder-IR-dir.txt", sep = '\t',header = TRUE)
+ac_nuc_ctrl.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/pooled_ac_nuc_ctrl/IRFinder-IR-dir.txt", sep = '\t',header = TRUE)
+ac_nuc_vcp.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/pooled_ac_nuc_vcp/IRFinder-IR-dir.txt", sep = '\t',header = TRUE)
+ac_cyt_ctrl.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/pooled_ac_cyt_ctrl/IRFinder-IR-dir.txt", sep = '\t',header = TRUE)
+ac_cyt_vcp.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/pooled_ac_cyt_vcp/IRFinder-IR-dir.txt", sep = '\t',header = TRUE)
+ac_bir_ctrl.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/pooled_ac_bir_ctrl/IRFinder-IR-dir.txt", sep = '\t',header = TRUE)
+ac_bir_c9orf.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/pooled_ac_bir_c9orf/IRFinder-IR-dir.txt", sep = '\t',header = TRUE)
+ac_tyz_ctrl.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/pooled_ac_tyz_ctrl/IRFinder-IR-dir.txt", sep = '\t',header = TRUE)
+ac_tyz_sod1.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/pooled_ac_tyz_sod1/IRFinder-IR-dir.txt", sep = '\t',header = TRUE)
+ac_bar_a0.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/pooled_ac_bar_a0/IRFinder-IR-nondir.txt", sep = '\t',header = TRUE)
+ac_bar_a1.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/pooled_ac_bar_a1/IRFinder-IR-nondir.txt", sep = '\t',header = TRUE)
+
+ac_who_ctrl.IR <- cleanIRFinderQuant(ac_who_ctrl.IRFinder)
+ac_who_vcp.IR <- cleanIRFinderQuant(ac_who_vcp.IRFinder)
+ac_nuc_ctrl.IR <- cleanIRFinderQuant(ac_nuc_ctrl.IRFinder)
+ac_nuc_vcp.IR <- cleanIRFinderQuant(ac_nuc_vcp.IRFinder)
+ac_cyt_ctrl.IR <- cleanIRFinderQuant(ac_cyt_ctrl.IRFinder)
+ac_cyt_vcp.IR <- cleanIRFinderQuant(ac_cyt_vcp.IRFinder)
+ac_bir_ctrl.IR <- cleanIRFinderQuant(ac_bir_ctrl.IRFinder)
+ac_bir_c9orf.IR <- cleanIRFinderQuant(ac_bir_c9orf.IRFinder)
+ac_tyz_ctrl.IR <- cleanIRFinderQuant(ac_tyz_ctrl.IRFinder)
+ac_tyz_sod1.IR <- cleanIRFinderQuant(ac_tyz_sod1.IRFinder)
+ac_bar_a0.IR <- cleanIRFinderQuant(ac_bar_a0.IRFinder)
+ac_bar_a1.IR <- cleanIRFinderQuant(ac_bar_a1.IRFinder)
+
+# Import already compared IRFinder output:
+ac_who_vcp_vs_ctrl.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/ac_who_vcp-vs-ctrl.txt", sep = '\t',header = TRUE)
+ac_nuc_vcp_vs_ctrl.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/ac_nuc_vcp-vs-ctrl.txt", sep = '\t',header = TRUE)
+ac_cyt_vcp_vs_ctrl.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/ac_cyt_vcp-vs-ctrl.txt", sep = '\t',header = TRUE)
+ac_ctrl_cyt_vs_nuc.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/ac_ctrl_cyt-vs-nuc.txt", sep = '\t',header = TRUE)
+ac_vcp_cyt_vs_nuc.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/ac_vcp_cyt-vs-nuc.txt", sep = '\t',header = TRUE)
+ac_bir_c9orf_vs_ctrl.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/ac_bir_c9orf-vs-ctrl.txt", sep = '\t',header = TRUE)
+ac_tyz_sod1_vs_ctrl.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/ac_tyz_sod1-vs-ctrl.txt", sep = '\t',header = TRUE)
+ac_bar_a1_vs_a0.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/ac_bar_a1-vs-a0.txt", sep = '\t',header = TRUE)
+ac_mou_sod1_vs_ctrl.IRFinder <- read.table("/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-mouse-bacTRAP-cleveland-2015/splicing/IRFinder/ac_mou_sod1_vs_ctrl.txt", sep = '\t',header = TRUE)
+
+# import gene expression results (using HTSeq counts in intersection-strict mode)
+dge_res_ac_who_vcp_vs_ctrl <- readRDS("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/res_ac_who_vcp_vs_ctrl.RDS")
+dge_res_ac_nuc_vcp_vs_ctrl <- readRDS("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/res_ac_nuc_vcp_vs_ctrl.RDS")
+dge_res_ac_cyt_vcp_vs_ctrl <- readRDS("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/res_ac_cyt_vcp_vs_ctrl.RDS")
+dge_res_ac_ctrl_cyt_vs_nuc <- readRDS("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/res_ac_ctrl_cyt_vs_nuc.RDS")
+dge_res_ac_vcp_cyt_vs_nuc <- readRDS("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/res_ac_vcp_cyt_vs_nuc.RDS")
+dge_res_ac_tyz_sod1_vs_ctrl <- readRDS("/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-ipsc-tyzack-2017/expression/deseq2/res_ac_tyz_sod1_vs_ctrl.RDS")
+dge_res_ac_bir_c9orf_vs_ctrl <- readRDS("/camp/home/ziffo/home/downloaded-public-data/astrocyte-c9orf72-ipsc-birger-2019/expression/deseq2/res_ac_bir_c9orf_vs_ctrl.RDS")
+dge_res_ac_bar_a1_vs_a0 <- readRDS("/camp/home/ziffo/home/downloaded-public-data/reactive-astrocyte-barbar-2020/expression/deseq/res_ac_bar_a1_vs_a0.RDS")
+dge_res_ac_mou_sod1_vs_ctrl <- readRDS("/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-mouse-bacTRAP-cleveland-2015/expression/deseq/res_ac_mou_sod1_vs_ctrl.RDS")
+
+# import mass spec results
+mass_spec_ac_vcp_vs_ctrl_stp <- read_excel("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/ac_vcp_fractions_mass_spectrometry_doaa.xlsx", sheet = "All Protein data")
+mass_spec_ac <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/ac_vcp_fractions_massspec_protein_groups.txt", sep = '\t',header = TRUE)
+nuc_mass_spec_results <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/nuclear_mass_spec_results.RDS")
+cyt_mass_spec_results <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/cytoplasmic_mass_spec_results.RDS")
+ctrl_mass_spec_results <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/ctrl_mass_spec_results.RDS")
+vcp_mass_spec_results <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/vcp_mass_spec_results.RDS")
+
+# clean IRFinder results
+ac_who_vcp_vs_ctrl <- cleanIRFinder(IRFinder = ac_who_vcp_vs_ctrl.IRFinder, deseq_res = dge_res_ac_who_vcp_vs_ctrl)
+ac_nuc_vcp_vs_ctrl <- cleanIRFinder(IRFinder = ac_nuc_vcp_vs_ctrl.IRFinder, deseq_res = dge_res_ac_nuc_vcp_vs_ctrl, mass_spec = nuc_mass_spec_results)
+ac_cyt_vcp_vs_ctrl <- cleanIRFinder(IRFinder = ac_cyt_vcp_vs_ctrl.IRFinder, deseq_res = dge_res_ac_cyt_vcp_vs_ctrl, mass_spec = cyt_mass_spec_results)
+ac_ctrl_cyt_vs_nuc <- cleanIRFinder(IRFinder = ac_ctrl_cyt_vs_nuc.IRFinder, deseq_res = dge_res_ac_ctrl_cyt_vs_nuc)
+ac_vcp_cyt_vs_nuc <- cleanIRFinder(IRFinder = ac_vcp_cyt_vs_nuc.IRFinder, deseq_res = dge_res_ac_vcp_cyt_vs_nuc)
+nuc_ir_cyt_dge <- cleanIRFinder(IRFinder = ac_nuc_vcp_vs_ctrl.IRFinder, deseq_res = dge_res_ac_cyt_vcp_vs_ctrl)
+ac_bir_c9orf_vs_ctrl <- cleanIRFinder(IRFinder = ac_bir_c9orf_vs_ctrl.IRFinder, deseq_res = dge_res_ac_bir_c9orf_vs_ctrl)
+ac_tyz_sod1_vs_ctrl <- cleanIRFinder(IRFinder = ac_tyz_sod1_vs_ctrl.IRFinder, deseq_res = dge_res_ac_tyz_sod1_vs_ctrl)
+ac_bar_a1_vs_a0 <- cleanIRFinder(IRFinder = ac_bar_a1_vs_a0.IRFinder, deseq_res = dge_res_ac_bar_a1_vs_a0)
+ac_mou_sod1_vs_ctrl <- cleanIRFinder(IRFinder = ac_mou_sod1_vs_ctrl.IRFinder, deseq_res = dge_res_ac_mou_sod1_vs_ctrl, species = "Mmusculus")
+
+# absolute IR compared
+ac_who_vcp_vs_ctrl.absoluteIR <- cleanIRFinderQuantCompared(mutant = ac_who_vcp.IR, control = ac_who_ctrl.IR, deseq_res = dge_res_ac_who_vcp_vs_ctrl)
+ac_nuc_vcp_vs_ctrl.absoluteIR <- cleanIRFinderQuantCompared(mutant = ac_nuc_vcp.IR, control = ac_nuc_ctrl.IR, deseq_res = dge_res_ac_nuc_vcp_vs_ctrl)
+ac_cyt_vcp_vs_ctrl.absoluteIR <- cleanIRFinderQuantCompared(mutant = ac_cyt_vcp.IR, control = ac_cyt_ctrl.IR, deseq_res = dge_res_ac_cyt_vcp_vs_ctrl)
+ac_ctrl_cyt_vs_nuc.absoluteIR <- cleanIRFinderQuantCompared(mutant = ac_cyt_ctrl.IR, control = ac_nuc_ctrl.IR, deseq_res = dge_res_ac_ctrl_cyt_vs_nuc)
+ac_vcp_cyt_vs_nuc.absoluteIR <- cleanIRFinderQuantCompared(mutant = ac_cyt_vcp.IR, control = ac_nuc_vcp.IR, deseq_res = dge_res_ac_vcp_cyt_vs_nuc)
+ac_nucIR_cytDGE.absoluteIR <- cleanIRFinderQuantCompared(mutant = ac_nuc_vcp.IR, control = ac_nuc_ctrl.IR, deseq_res = dge_res_ac_cyt_vcp_vs_ctrl)
+ac_bir_c9orf_vs_ctrl.absoluteIR <- cleanIRFinderQuantCompared(mutant = ac_bir_c9orf.IR, control = ac_bir_ctrl.IR, deseq_res = dge_res_ac_bir_c9orf_vs_ctrl)
+ac_tyz_sod1_vs_ctrl.absoluteIR <- cleanIRFinderQuantCompared(mutant = ac_tyz_sod1.IR, control = ac_tyz_ctrl.IR, deseq_res = dge_res_ac_tyz_sod1_vs_ctrl)
+ac_bar_a1_vs_a0.absoluteIR <- cleanIRFinderQuantCompared(mutant = ac_bar_a1.IR, control = ac_bar_a0.IR, deseq_res = dge_res_ac_bar_a1_vs_a0)
+```
+
+## Figure 1
+
+Panels A & B are from Biorender so merged with illustrator
+
+```{r}
+# 1D sinaplot of IR events in VCP, C9orf72, SOD1 & reactive astrocytes
+vcp <- ac_who_vcp_vs_ctrl %>% dplyr::filter(p0.05_reliable == "significant") %>% dplyr::select(Intron.GeneName.GeneID, Chr, Start, End, gene_name, ensID, p.diff, IRratio.diff, p0.05_reliable_IRdirection, log2FoldChange) %>% mutate(mutation = "VCP - CTRL")
+sod1 <-ac_tyz_sod1_vs_ctrl %>% dplyr::filter(p0.05_reliable == "significant") %>% dplyr::select(Intron.GeneName.GeneID, Chr, Start, End, gene_name, ensID, p.diff, IRratio.diff, p0.05_reliable_IRdirection, log2FoldChange) %>% mutate(mutation = "SOD1 - CTRL")
+c9orf <- ac_bir_c9orf_vs_ctrl %>% dplyr::filter(p0.05_reliable == "significant") %>% dplyr::select(Intron.GeneName.GeneID, Chr, Start, End, gene_name, ensID, p.diff, IRratio.diff, p0.05_reliable_IRdirection, log2FoldChange) %>% mutate(mutation = "C9orf72 - CTRL")
+a1 <- ac_bar_a1_vs_a0 %>% dplyr::filter(p0.05_reliable == "significant") %>% dplyr::select(Intron.GeneName.GeneID, Chr, Start, End, gene_name, ensID, p.diff, IRratio.diff, p0.05_reliable_IRdirection, log2FoldChange) %>% mutate(mutation = "Reactive - CTRL")
+vcp_sod1_c9orf_a1 <- bind_rows(vcp, sod1, c9orf, a1) %>% mutate(mutation = factor(mutation, levels = c("VCP - CTRL", "C9orf72 - CTRL", "SOD1 - CTRL", "Reactive - CTRL")))
+vcp_sod1_c9orf_a1_sina_plot <- sinaplot.one.sample(data = vcp_sod1_c9orf_a1, groups = "mutation", continuous = "IRratio.diff", labels = "gene_name", label_number = 0, stat.y.position = 0.3, width = 0.15, flip = "no", colours = 4) + ylab(label = expression(Delta~IR~ratio) ) + xlab("") + ylim(c(-0.3,0.3)) +
+  geom_segment(aes(x = 4.5, xend = 4.5, y= 0.05, yend= 0.25), arrow=arrow(length=unit(0.4,"cm")), color = "dodgerblue") +
+  geom_segment(aes(x = 4.5, xend = 4.5, y= -0.05, yend= -0.25),arrow=arrow(length=unit(0.4,"cm")), color = "firebrick2") +
+  annotate("text", x = 4.3, y = 0.27, label = "IR Up", colour = "dodgerblue", size = 3) +   annotate("text", x = 4.3, y = -0.27, label = "IR Down", colour = "firebrick2", size = 3)
+vcp_sod1_c9orf_a1_sina_plot
+
+# 1E MA plots of IR events in VCP
+ac_who_vcp_vs_ctrl.labels <- c("VIM", "COL1A1", "MYL6", "FN1", "FLNA", "PDLIM7", "TNC", "ILK", " MCAM", "HLA-B", "TGFB1L1", "OSMR", "RND3", "PIMREG", "LOXL3", "RECK", "COL7A1", "UBN1", "TTBK1", "TSC1", "ADAM19")
+ac_who_ma <- ma_plot_irfinder(data = ac_who_vcp_vs_ctrl, labels_list = ac_who_vcp_vs_ctrl.labels) + ylab(expression(Delta~IR~ratio~VCP-CTRL)) + xlim(1,5.2) + ylim(-0.36,0.36) +
+  geom_segment(aes(x = 5.0, xend = 5.0, y= 0.1, yend= 0.3), arrow=arrow(length=unit(0.4,"cm")), color = "dodgerblue") +
+  geom_segment(aes(x = 5.0, xend = 5.0, y= -0.1, yend= -0.3),arrow=arrow(length=unit(0.4,"cm")), color = "firebrick2") +
+  annotate("text", x = 4.6, y = 0.3, label = "IR Up", colour = "dodgerblue", size = 3) +   annotate("text", x = 4.6, y = -0.3, label = "IR Down", colour = "firebrick2", size = 3)
+ac_who_ma
+
+# 1F MA plots of IR events in C9orf72
+C9ORF72.ma <- ma_plot_irfinder(data = ac_bir_c9orf_vs_ctrl, labels_list = astrocyte.reactivity.labels) + ylab(expression(Delta~IR~ratio~C9orf72-CTRL)) + xlim(0.6,4.5) + ylim(-0.4,0.4) +
+  geom_segment(aes(x = 4.3, xend = 4.3, y= 0.1, yend= 0.3), arrow=arrow(length=unit(0.4,"cm")), color = "dodgerblue") +
+  geom_segment(aes(x = 4.3, xend = 4.3, y= -0.1, yend= -0.3),arrow=arrow(length=unit(0.4,"cm")), color = "firebrick2") +
+  annotate("text", x = 3.7, y = 0.3, label = "IR Up", colour = "dodgerblue", size = 3) +   annotate("text", x = 3.7, y = -0.3, label = "IR Down", colour = "firebrick2", size = 3)
+C9ORF72.ma
+
+# 1G MA plots of IR events in SOD1
+SOD1.ma <- ma_plot_irfinder(data = ac_tyz_sod1_vs_ctrl, labels_list = astrocyte.reactivity.labels) + ylab(expression(Delta~IR~ratio~SOD1-CTRL)) + xlim(0.6,4) + ylim(-0.5,0.5) +
+  geom_segment(aes(x = 3.8, xend = 3.8, y= 0.1, yend= 0.3), arrow=arrow(length=unit(0.4,"cm")), color = "dodgerblue") +
+  geom_segment(aes(x = 3.8, xend = 3.8, y= -0.1, yend= -0.3),arrow=arrow(length=unit(0.4,"cm")), color = "firebrick2") +
+  annotate("text", x = 3.6, y = 0.4, label = "IR Up", colour = "dodgerblue", size = 3) +   annotate("text", x = 3.6, y = -0.4, label = "IR Down", colour = "firebrick2", size = 3)
+SOD1.ma
+
+# 1H MA plots of IR events in reactive astrocytes
+ac_bar_a1_ma <- ma_plot_irfinder(data = ac_bar_a1_vs_a0, labels_list = astrocyte.reactivity.labels.ac_a1) + ylab(expression(Delta~IR~ratio~Reactive-CTRL)) + xlim(1,4.5) + ylim(-0.4,0.4)  +
+  geom_segment(aes(x = 4.3, xend = 4.3, y= 0.1, yend= 0.3), arrow=arrow(length=unit(0.4,"cm")), color = "dodgerblue") +
+  geom_segment(aes(x = 4.3, xend = 4.3, y= -0.1, yend= -0.3),arrow=arrow(length=unit(0.4,"cm")), color = "firebrick2") +
+  annotate("text", x = 3.9, y = 0.3, label = "IR Up", colour = "dodgerblue", size = 3) +   annotate("text", x = 3.9, y = -0.3, label = "IR Down", colour = "firebrick2", size = 3)
+ac_bar_a1_ma
+
+VCP.ctrl.filt <- ac_who_ctrl.IR %>% dplyr::select(Name.Coords, coords, ensID, gene_name, Chr, Start, End, Strand, gc_content, intron_length, IRratio, reliable, VCP.ctrl.retained = retained) %>% filter(reliable == "reliable")
+VCP.mutant.filt <- ac_who_vcp.IR %>% dplyr::select(Name.Coords, coords, ensID, gene_name, Chr, Start, End, Strand, IRratio,reliable, VCP.mutant.retained = retained, gc_content, intron_length) %>% filter(reliable == "reliable") 
+SOD1.ctrl.filt <- ac_tyz_ctrl.IR %>% dplyr::select(Name.Coords, coords, ensID, gene_name, Chr, Start, End, Strand,IRratio,reliable, SOD1.ctrl.retained = retained, gc_content, intron_length)  %>% filter(reliable == "reliable")
+SOD1.mutant.filt <- ac_tyz_sod1.IR %>% dplyr::select(Name.Coords, coords, ensID, gene_name, Chr, Start, End, Strand, IRratio,reliable, SOD1.mutant.retained = retained, gc_content, intron_length) %>% filter(reliable == "reliable") 
+C9ORF72.ctrl.filt <- ac_bir_ctrl.IR %>% dplyr::select(Name.Coords, coords, ensID, gene_name, Chr, Start, End, Strand,IRratio,reliable, C9ORF72.ctrl.retained = retained, gc_content, intron_length) %>% filter(reliable == "reliable")
+C9ORF72.mutant.filt <- ac_bir_c9orf.IR %>% dplyr::select(Name.Coords, coords, ensID, gene_name, Chr, Start, End, Strand, IRratio,reliable, C9ORF72.mutant.retained = retained, gc_content, intron_length) %>% filter(reliable == "reliable") 
+A1.ctrl.filt <- ac_bar_a0.IR %>% dplyr::select(Name.Coords, coords, ensID, gene_name, Chr, Start, End, Strand,IRratio,reliable, A1.ctrl.retained = retained, gc_content, intron_length) %>% filter(reliable == "reliable")
+A1.mutant.filt <- ac_bar_a1.IR %>% dplyr::select(Name.Coords, coords, ensID, gene_name, Chr, Start, End, Strand, IRratio,reliable, A1.mutant.retained = retained, gc_content, intron_length) %>% filter(reliable == "reliable") 
+ctrl.mutant.4datasets.IR <- VCP.ctrl.filt %>% full_join(VCP.mutant.filt, by = c("Name.Coords", "coords", "ensID", "gene_name", "Chr", "Start", "End", "Strand", "gc_content", "intron_length")) %>%
+  full_join(SOD1.ctrl.filt, by = c("Name.Coords", "coords", "ensID", "gene_name", "Chr", "Start", "End", "Strand", "gc_content", "intron_length")) %>%
+  full_join(SOD1.mutant.filt, by = c("Name.Coords", "coords", "ensID", "gene_name", "Chr", "Start", "End", "Strand", "gc_content", "intron_length")) %>%
+  full_join(C9ORF72.ctrl.filt, by = c("Name.Coords", "coords", "ensID", "gene_name", "Chr", "Start", "End", "Strand", "gc_content", "intron_length")) %>%
+  full_join(C9ORF72.mutant.filt, by = c("Name.Coords", "coords", "ensID", "gene_name", "Chr", "Start", "End", "Strand", "gc_content", "intron_length")) %>%
+  full_join(A1.ctrl.filt, by = c("Name.Coords", "coords", "ensID", "gene_name", "Chr", "Start", "End", "Strand", "gc_content", "intron_length")) %>%
+  full_join(A1.mutant.filt, by = c("Name.Coords", "coords", "ensID", "gene_name", "Chr", "Start", "End", "Strand", "gc_content", "intron_length")) %>% 
+  mutate(retained = case_when(VCP.ctrl.retained == "retained" | VCP.mutant.retained == "retained" | SOD1.ctrl.retained == "retained" | SOD1.mutant.retained == "retained" | C9ORF72.ctrl.retained == "retained" | C9ORF72.mutant.retained == "retained" | A1.ctrl.retained == "retained" | A1.mutant.retained == "retained" ~ "retained", TRUE ~ "spliced"))
+
+
+## GC content
+gc.retained.sina_plot <- sinaplot(data = ctrl.mutant.4datasets.IR, groups = "retained", continuous = "gc_content", dashed.line = 0.5, stats.test = "wilcox_test") + ylim(c(0,1)) + ylab(label = expression(GC~content) ) + xlab("") #+ theme(axis.title = element_text(size=10), axis.text = element_text(size=6))
+gc.retained.sina_plot
+
+## Intron length
+length.retained.sina_plot <- sinaplot(data = ctrl.mutant.4datasets.IR, groups = "retained", continuous = "intron_length", dashed.line = "NA", stats.test = "wilcox_test", stat.y.position = 5.5) + ylim(c(0,5)) +  ylab(label = expression(log[10]~intron~length) ) + xlab("") +  scale_y_log10()# + theme(axis.title = element_text(size=10), axis.text = element_text(size=6))
+length.retained.sina_plot
+
+## PhastCons 
+gr_introns <- as.GenomicRange(ctrl.mutant.4datasets.IR$Name.Coords)
+seqlevelsStyle(gr_introns) <- "UCSC"
+ctrl.mutant.4datasets.IR$phast_cons <- gscores(phast, gr_introns)$default # takes ~1min - too slow to add to function
+PhastCons.retained.sina_plot <- sinaplot(data = ctrl.mutant.4datasets.IR, groups = "retained", continuous = "phast_cons", dashed.line = "NA", stats.test = "t_test", stat.y.position = 0.4) + 
+  ylab(label = expression(log[10]~PhastCons~score) ) + xlab("") + scale_y_log10()  #+ theme(axis.title = element_text(size=10), axis.text = element_text(size=6))
+PhastCons.retained.sina_plot
+
+# iCLIP
+sum the iclip xlink scores for each RBP in HepG2 in a for loop
+clip_hepg2 <- list.files("/camp/home/ziffo/home/genomes/clip-bedgraphs/HepG2/")
+clip_hepg2 <- clip_hepg2[!grepl("3nt_peaks",clip_hepg2)] # only assess raw crosslink files without any peak calling for enrichment
+grange_introns <- as.GenomicRange(ctrl.mutant.4datasets.IR$Name.Coords) # create GRanges for each intron (both retained and non retained)
+intron_coords <- tibble(intron = 1:length(ctrl.mutant.4datasets.IR$coords), coords = ctrl.mutant.4datasets.IR$coords) # intron coordinates for to enable matching back to original coords in IRFinder dataframe
+coverage_list_who <- list()
+for (i in seq_along(clip_hepg2)) {
+  print(clip_hepg2[[i]])
+  rbp <- str_remove(clip_hepg2[[i]], ".merged.bed.gz")
+  bed <- import(paste("/camp/home/ziffo/home/genomes/clip-bedgraphs/HepG2/", clip_hepg2[[i]],sep=""))
+  seqlevelsStyle(bed) <- "NCBI" # remove "chr"
+  grange_overlap <- findOverlaps(query = grange_introns, subject=bed, ignore.strand=FALSE) # find overlaps between RBP binding sites & retained introns
+  range <- bed[ queryHits(grange_overlap) ] %>% as.data.frame() # subset iCLIP xlinks that overlap with the introns - 50,287 rows each with a xlinks score. There are 8739 introns - many introns have multiple scores.
+  coverage_list_who[[i]] <- range %>%  mutate( intron = queryHits(grange_overlap)) %>%  group_by(intron) %>% summarise(iclip_score = sum(score) ) # sum the scores for each intron - 4266 introns with scores, remaining introns have 0 scores
+  coverage_list_who[[i]]$iclip_score[is.na(coverage_list_who[[i]]$iclip_score)]<-0 # set NA scores to 0
+  coverage_list_who[[i]] <- coverage_list_who[[i]] %>% left_join(intron_coords, by = "intron") # add intron coordinates to match back to IRFinder results
+  names(coverage_list_who)[i] <- rbp
+}
+saveRDS(coverage_list_who, "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/coverage_list_who.absolute_IR.ctrl.mutant.4datasets.IR.CLIPscores.RDS")
+coverage_list_who_df <- bind_rows(coverage_list_who, .id = "intron") # collapse list of dataframes into a single df
+iclip_scores <- coverage_list_who_df %>% distinct() %>% group_by(intron, coords) %>% # each column becomes an RBP. Each row is an intron - there are 310,450 in IRFinder but only 155,313 have xlink scores.
+  summarise(iclip_score.sum = sum(iclip_score)) %>% # https://stackoverflow.com/questions/63365516/tidyr-pivot-wider-error-cant-convert-double-to-list
+  tidyr::pivot_wider(names_from = intron, values_from = iclip_score.sum, values_fill = 0)
+# iclip_scores <- pivot_wider(coverage_list_who_df, names_from = intron, values_from = iclip_score, values_fill = 0)
+iclip_scores <- ctrl.mutant.4datasets.IR %>% dplyr::select(coords) %>% full_join(iclip_scores, by = "coords") # add back the introns without xlink scores
+iclip_scores[is.na(iclip_scores)] <- 0  # set NA scores to 0
+iclip_scores$intron_length <- ctrl.mutant.4datasets.IR$intron_length[iclip_scores$coords %in% ctrl.mutant.4datasets.IR$coords] # add intron_length to df
+iclip_scores_normalised <- iclip_scores %>% mutate_if(is.numeric, ~ (./intron_length)) %>% dplyr::select(-intron_length) # normalise all scores for intron_length
+iclip_scores_normalised$sum <- iclip_scores_normalised %>% select_if(is.numeric) %>% rowSums # sum all normalised RBP scores for each intron
+saveRDS(iclip_scores_normalised, "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/absolute_IR.ctrl.mutant.4datasets.IR.CLIPscores.RDS")
+iclip_scores_normalised <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/absolute_IR.ctrl.mutant.4datasets.IR.CLIPscores.RDS")
+ctrl.mutant.4datasets.IR$iclip_enrichment <- iclip_scores_normalised$sum[iclip_scores_normalised$coords %in% ctrl.mutant.4datasets.IR$coords] # add normalised sum of sums of RBP xlinks to IRFinder results
+# boxplot of normalised score for retained & non-retained introns
+clip.retained.sina_plot <- sinaplot(data = ctrl.mutant.4datasets.IR, groups = "retained", continuous = "iclip_enrichment", dashed.line = "NA", stats.test = "t_test", stat.y.position = 2.5) + #ylim(c(0,1)) + 
+  ylab(label = expression(log[10]~iCLIP~xlinks~score) ) + xlab("") +  scale_y_log10() #+ theme(axis.title = element_text(size=10), axis.text = element_text(size=6))
+clip.retained.sina_plot
+```
+
+#### Merge
+
+```{r}
+fig1.merged <- ggarrange(vcp_sod1_c9orf_a1_sina_plot, 
+  ggarrange(ac_who_ma, C9ORF72.ma, nrow = 1, ncol = 2, widths = c(1,1), labels = c("D", "E")),
+  ggarrange(SOD1.ma, ac_bar_a1_ma, nrow = 1, ncol = 2, widths = c(1,1), labels = c("F", "G")), 
+  ggarrange(gc.retained.sina_plot, length.retained.sina_plot, PhastCons.retained.sina_plot, clip.retained.sina_plot, nrow = 1, ncol = 4, widths = c(1,1,1,1)), # notNMD.retained.sina_plot
+  nrow = 4, heights = c(1.1, 1.3, 1.3, 0.9), labels = c("C", "", "", "H"))
+fig1.merged
+ggsave(fig1.merged, filename = "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/irlib/figures/fig1.merged.png", height = 10, width = 11)
+```
+
+
+### Figure S1B PCA & dendrogram
+
+```{r}
+patani <- read.csv("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/sample-details/sample_table.csv")
+patani <- patani[!patani$cellline == "ctrl2",] # remove CTRL2 samples due to batch effects
+patani$cellline <- patani$cellline %>% gsub("ctrl5", "ctrl2", .) # for the paper we rename ctrl5 as ctrl2 to avoid confusion as to why we have ctrl1 & 5 (but not 2,3 and 4)
+patani <- patani %>% distinct(fraction_cellline, .keep_all = TRUE) # remove rows for technical repeats
+patani <- patani %>% mutate(mutation = as.factor(vcp), fraction = factor(fraction, levels = c("whole", "nuclear", "cytoplasmic")))
+patani$condition <- gsub("vcp", "als", patani$mutation)
+patani$condition <- factor(patani$condition, levels = c("ctrl", "als")) # set the reference control first to ensure comparison is ALS vs CTRL (rather than CTRL vs ALS)
+patani$sample <- patani$fraction_cellline %>% gsub("whole", "who", .) %>% gsub("nuclear", "nuc", .) %>% gsub("cytoplasmic", "cyt", .) #%>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .)
+patani$sample <- paste("ac_",patani$sample,sep="")
+patani$patient <- patani$cellline %>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .)
+patani <- patani %>% dplyr::filter(fraction == "whole") # astrocyte whole-cell samples for VCP only
+sampleTable <- patani %>% dplyr::select(sampleName=fraction_cellline, condition, fraction, mutation, cellline, patient, sample) %>% mutate(fileName = paste(sample, ".tab", sep = ""), patient_fraction = paste(patient, fraction, sep = "_")) %>% dplyr::select(sampleName, fileName, condition, everything())
+htseqdir <- "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/alignment/htseq"
+dds <- DESeqDataSetFromHTSeqCount(sampleTable = sampleTable, directory = htseqdir, design = ~ condition) # create DESeqDataSet with this design - Import htseq .tab tables
+dds <- DESeq(dds) # run DESeq2
+vsd_ac_who_vcp_vs_ctrl <- vst(dds, blind=FALSE) # VST transformation
+colnames(vsd_ac_who_vcp_vs_ctrl) <- colnames(vsd_ac_who_vcp_vs_ctrl) %>% gsub("whole_", "", .) %>% gsub("5", "2", .) %>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .) # Labels for mutants are based on VCP mutation. R155C mutant = GLIA. R191Q mutant = CB1E.
+pcaData_astrocyte <- plotPCA(vsd_ac_who_vcp_vs_ctrl, intgroup=c("sample", "condition", "mutation", "cellline","fraction", "patient_fraction", "patient"), returnData=TRUE)
+percentVar_astrocyte <- round(100 * attr(pcaData_astrocyte, "percentVar"))
+ac_who_pca <- ggplot(pcaData_astrocyte, aes(PC1, PC2, color=mutation)) + geom_text_repel(aes(label=patient), size = 3) + scale_colour_manual( values = c("dodgerblue", "firebrick2") ) +  theme_bw() +  
+  theme(panel.grid = element_blank(), legend.title = element_blank(), legend.text=element_text(size=8), legend.position = "right", legend.box = "vertical", legend.spacing = unit(0.2, 'cm')) + geom_point(size=2) + 
+  xlab(paste0("PC1: ",percentVar_astrocyte[1],"% variance")) +  ylab(paste0("PC2: ",percentVar_astrocyte[2],"% variance")) + coord_fixed()
+sampleDists <- dist(t(assay(vsd_ac_who_vcp_vs_ctrl)))
+hc <- hclust(sampleDists, method = "ward.D2")
+a <- c("dodgerblue", "dodgerblue", "firebrick2","firebrick2")
+ac_who_dendrogram <- ggdendrogram(hc, rotate = TRUE, theme_dendro = FALSE) +  theme_classic()  + theme(axis.line=element_blank(), axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.text.y= element_text(colour = a), strip.background = element_rect(colour="black", fill="white"), panel.grid = element_blank()) 
+# merge PCA & dendrogram
+ac_who_pca_dendrogram <- ggarrange(ac_who_pca, ac_who_dendrogram, nrow = 1, ncol = 2, widths = c(3,1))
+ggsave(ac_who_pca_dendrogram, filename = "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/irlib/figures/Fig1B_C.ac_who_pca_dendrogram.png", height = 2.5, width = 5)
+```
+
+## Figure S1
+
+A biorender schematic - add in illustrator
+
+```{r}
+# B PCA & Dendrogram
+patani <- read.csv("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/sample-details/sample_table.csv")
+patani <- patani[!patani$cellline == "ctrl2",] # remove CTRL2 samples due to batch effects
+patani$cellline <- patani$cellline %>% gsub("ctrl5", "ctrl2", .) # for the paper we rename ctrl5 as ctrl2 to avoid confusion as to why we have ctrl1 & 5 (but not 2,3 and 4)
+patani <- patani %>% distinct(fraction_cellline, .keep_all = TRUE) # remove rows for technical repeats
+patani <- patani %>% mutate(mutation = as.factor(vcp), fraction = factor(fraction, levels = c("whole", "nuclear", "cytoplasmic")))
+patani$condition <- gsub("vcp", "als", patani$mutation)
+patani$condition <- factor(patani$condition, levels = c("ctrl", "als")) # set the reference control first to ensure comparison is ALS vs CTRL (rather than CTRL vs ALS)
+patani$sample <- patani$fraction_cellline %>% gsub("whole", "who", .) %>% gsub("nuclear", "nuc", .) %>% gsub("cytoplasmic", "cyt", .) #%>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .)
+patani$sample <- paste("ac_",patani$sample,sep="")
+patani$patient <- patani$cellline %>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .)
+patani <- patani %>% dplyr::filter(fraction == "whole") # astrocyte whole-cell samples for VCP only
+patani <- patani %>% dplyr::select(sampleName=sample, condition, mutation, patient) %>% mutate(dataset = "VCP", fileName = paste(sampleName, ".tab", sep = ""))
+tyzack <- read_excel("/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-ipsc-tyzack-2017/sample-details/metadata.xlsx")
+tyzack <- tyzack %>% distinct(sample, .keep_all = TRUE)
+tyzack <- tyzack %>% mutate(mutation = factor(condition, levels = c("ctrl", "sod1")),
+                            filename = sample,
+                            fraction = "whole")
+tyzack$sample <- paste("ac_tyz_",tyzack$sample,sep="")
+tyzack$condition <- gsub("sod1", "als", tyzack$mutation)
+tyzack$condition <- factor(tyzack$condition, levels = c("ctrl", "als")) # set the reference control first to ensure comparison is ALS vs CTRL (rather than CTRL vs ALS)
+tyzack$cellline <- c("ctrl1","ctrl2","sod1")
+tyzack$patient <- c("ctrl1","ctrl2","sod1")
+tyzack <- tyzack %>% dplyr::select(sampleName=sample, condition, mutation, patient) %>% mutate(dataset = "SOD1", fileName = paste(sampleName, ".tab", sep = "")) %>% dplyr::select(sampleName, fileName, condition, everything()) %>% as.data.frame
+birger <- read_excel("/camp/home/ziffo/home/downloaded-public-data/astrocyte-c9orf72-ipsc-birger-2019/sample-details/metadata.xlsx")
+birger$condition <- birger$condition %>% gsub("control", "ctrl", .)
+birger <- birger %>% mutate(sample = factor(sample, levels = c("control_L3", "control_L9", "C9orf72_L5", "C9orf72_L8")), 
+                            mutation = factor(condition, levels = c("ctrl", "C9orf72")),
+                            filename = sample,
+                            fraction = "whole")
+birger$patient <- birger$sample %>% gsub("control_L", "ctrl_L", .)
+birger$sample <- birger$sample %>% gsub("control_L", "ctrl", .) %>% gsub("C9orf72_L", "C9orf", .) %>% paste("ac_bir_", .,sep="")
+birger$condition <- gsub("C9orf72", "als", birger$mutation)
+birger$condition <- factor(birger$condition, levels = c("ctrl", "als")) # set the reference control first to ensure comparison is ALS vs CTRL (rather than CTRL vs ALS)
+birger <- birger %>% dplyr::select(sampleName = sample, patient, condition, mutation) %>% mutate(dataset = "C9ORF72", fileName = paste(sampleName, ".tab", sep = "")) %>% dplyr::select(sampleName, fileName, condition, dataset, everything()) %>% as.data.frame
+barbar <- read_excel("/camp/home/ziffo/home/downloaded-public-data/reactive-astrocyte-barbar-2020/sample-details/sample_table.xls")
+barbar <- barbar %>% mutate(sampleName = sample, # set the reference control first
+                            fileName = paste(sampleName, ".tab", sep = ""),
+                            condition = factor(reactivity, levels = c("A0", "A1")),
+                            patient = gsub("ac_bar_", "", sample), patient = gsub("ac_bar_", "", patient), patient = gsub("m", "_M", patient), patient = gsub("f", "_F", patient), patient = gsub("u", "_U", patient), 
+                            patient = gsub("a1", "stimulated", patient), patient = gsub("a0", "untreated", patient), 
+                            dataset = "Cytokine-stimulated", mutation = condition,
+                            ) %>% 
+  dplyr::select(sampleName, fileName, condition, patient, dataset, mutation) %>% as.data.frame
+sampleTable <- bind_rows(patani, tyzack, birger, barbar) %>% select(sampleName, fileName, condition, everything()) %>% as.data.frame
+htseqdir="/camp/home/ziffo/home/projects/astrocyte-meta-analysis/alignment/htseq"
+dds <- DESeqDataSetFromHTSeqCount(sampleTable = sampleTable, 
+                                            directory = htseqdir, 
+                                            design = ~ condition) # create DESeqDataSet with this design - Import htseq .tab tables
+dds <- DESeq(dds) # run DESeq2
+vsd <- vst(dds, blind=FALSE) # VST transformation
+colnames(vsd) <- colnames(vsd) %>% gsub("whole_", "", .) %>% gsub("5", "2", .) %>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .) # Labels for mutants are based on VCP mutation. R155C mutant = GLIA. R191Q mutant = CB1E.
+pcaData_astrocyte <- plotPCA(vsd, intgroup=c("condition", "mutation", "patient", "dataset"), returnData=TRUE)
+percentVar_astrocyte <- round(100 * attr(pcaData_astrocyte, "percentVar"))
+pcaData_astrocyte$dataset <- factor(pcaData_astrocyte$dataset, levels = c("VCP", "C9ORF72", "SOD1", "Cytokine-stimulated"))
+ac_who_pca <- ggplot(pcaData_astrocyte, aes(PC1, PC2, color=dataset)) + geom_text_repel(aes(label=patient), size = 3) + scale_colour_manual( values = get_palette("npg",4) ) +  theme_bw() +  
+  theme(panel.grid = element_blank(), legend.title = element_blank(), legend.text=element_text(size=8), legend.position = "top", legend.box = "horizontal", legend.spacing = unit(0.1, 'cm')) + geom_point(size=1) + 
+  xlab(paste0("PC1: ",percentVar_astrocyte[1],"% variance")) +  ylab(paste0("PC2: ",percentVar_astrocyte[2],"% variance")) + coord_fixed()
+ac_who_pca
+
+sampleDists <- dist(t(assay(vsd)))
+hc <- hclust(sampleDists, method = "ward.D2")
+a <- c("dodgerblue", "dodgerblue", "firebrick2","firebrick2","dodgerblue", "dodgerblue", "firebrick2","firebrick2","firebrick2","dodgerblue", "dodgerblue","firebrick2","firebrick2","firebrick2","dodgerblue", "dodgerblue","dodgerblue")
+ac_who_dendrogram <- ggdendrogram(hc, rotate = TRUE, theme_dendro = FALSE) +  theme_classic()  + theme(axis.line=element_blank(), axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.text.y= element_text(colour = a), strip.background = element_rect(colour="black", fill="white"), panel.grid = element_blank()) 
+# merge PCA & dendrogram
+ac_who_dendrogram
+ac_who_pca_dendrogram <- ggarrange(ac_who_pca, ac_who_dendrogram, nrow = 1, ncol = 2, widths = c(3,1))
+
+# C DGE VCP vs CTRL
+patani <- read.csv("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/sample-details/sample_table.csv")
+patani <- patani[!patani$cellline == "ctrl2",] # remove CTRL2 samples due to batch effects
+patani$cellline <- patani$cellline %>% gsub("ctrl5", "ctrl2", .) # for the paper we rename ctrl5 as ctrl2 to avoid confusion as to why we have ctrl1 & 5 (but not 2,3 and 4)
+patani <- patani %>% distinct(fraction_cellline, .keep_all = TRUE) # remove rows for technical repeats
+patani <- patani %>% mutate(mutation = as.factor(vcp), fraction = factor(fraction, levels = c("whole", "nuclear", "cytoplasmic")))
+patani$condition <- gsub("vcp", "als", patani$mutation)
+patani$condition <- factor(patani$condition, levels = c("ctrl", "als")) # set the reference control first to ensure comparison is ALS vs CTRL (rather than CTRL vs ALS)
+patani$sample <- patani$fraction_cellline %>% gsub("whole", "who", .) %>% gsub("nuclear", "nuc", .) %>% gsub("cytoplasmic", "cyt", .) #%>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .)
+patani$sample <- paste("ac_",patani$sample,sep="")
+patani$patient <- patani$cellline %>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .)
+patani <- patani %>% dplyr::filter(fraction == "whole") # astrocyte whole-cell samples for VCP only
+sampleTable <- patani %>% dplyr::select(sampleName=fraction_cellline, condition, fraction, mutation, cellline, patient, sample) %>% mutate(fileName = paste(sample, ".tab", sep = ""), patient_fraction = paste(patient, fraction, sep = "_")) %>% dplyr::select(sampleName, fileName, condition, everything())
+htseqdir <- "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/alignment/htseq"
+dds <- DESeqDataSetFromHTSeqCount(sampleTable = sampleTable, 
+                                            directory = htseqdir, 
+                                            design = ~ condition) # create DESeqDataSet with this design - Import htseq .tab tables
+dds <- DESeq(dds) # run DESeq2
+res <- DESeq2::results(dds, name = "condition_als_vs_ctrl") # Astrocyte ALS vs CTRL
+gene2ens_filtered <-  filter(gene2ens, gene_id %in% rownames(res)) %>% unique # filter gene to ensID to only ENS names in the results tibble
+dge_res_ac_who_vcp_vs_ctrl <- res %>% as_tibble(rownames = "ensID") %>% left_join(gene2ens_filtered, by=c("ensID"="gene_id")) %>% arrange(padj) # join gene gene_nameS to res tibble & order by padj
+dge_res_ac_who_vcp_vs_ctrl.FDR0.05 <- dge_res_ac_who_vcp_vs_ctrl %>% filter(padj < 0.05) # 170
+dge_genes <- dge_res_ac_who_vcp_vs_ctrl.FDR0.05 %>% mutate(direction = case_when(log2FoldChange > 0 ~ "Up in VCP", TRUE ~ "Down in VCP")) %>% split(.$direction) %>%  map("ensID") # create list of IR up/down & Expression up/down genes
+dge_genes <- gost(dge_genes) # run gprofiler2 on all groups - runs on all KEGG, GO, REAC,TF, WP pathways simultaneously
+dge_genes$result
+dge_gprofiles_filt <- dge_genes$result %>% filter(str_detect(source, "KEGG|GO:BP|GO:MF|GO:CC|REAC|CORUM")) %>% arrange( -log10(p_value) ) %>% mutate( term_name = as.factor(term_name)) 
+dge_gprofiles_filt
+dge_gprofiles_filt$term_name <- gsub("extracellular matrix structural constituent conferring compression resistance", "extracellular matrix", dge_gprofiles_filt$term_name)
+dge_gprofiles_filt$term_name <- gsub("central nervous system", "", dge_gprofiles_filt$term_name)
+dge_gprofiles_filt$query <- factor(dge_gprofiles_filt$query, levels = c("Up in VCP", "Down in VCP"))
+# dge_gprofiles_curated_expup <- dge_gprofiles_filt %>% filter(query == "upregulated")
+# # paste('"',unique(dge_gprofiles_curated_expup$term_name),'",', sep = "", collapse = '\n') %>% cat()
+# dge_gprofiles_curated_expdown <- dge_gprofiles_filt %>% filter(query == "downregulated")
+# paste('"',unique(dge_gprofiles_curated_expdown$term_name),'",', sep = "", collapse = '\n') %>% cat()
+# IRevents_gprofiles_curated$term_name <- strtrim(IRevents_gprofiles_curated$term_name, 50) # limit term_name string length
+ac_who_vcp_vs_ctrl.DGE_only.go_curated <- curated_profiles(gprofiles = dge_gprofiles_filt) 
+ac_who_vcp_vs_ctrl.DGE_only.go_curated
+
+
+# D VAST TOOLS splicing modes
+source("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/scripts/vast_tools_functions.r")
+ac_who_vcp_vs_ctrl_compare <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/vast-tools/vast_out/whole/compare.tab", sep = '\t',header = TRUE)
+ac_who_vcp_vs_ctrl_diff <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/vast-tools/vast_out/whole/INCLUSION_table.DIFF.txt", sep = '\t',header = TRUE)
+ac_who_vcp_vs_ctrl.VASTTOOLS <- cleanVASTTOOLS(diff = ac_who_vcp_vs_ctrl_diff, comp = ac_who_vcp_vs_ctrl_compare)
+vast_tools.splicingtype_test <- filter(ac_who_vcp_vs_ctrl.VASTTOOLS, MV0.1 == "significant") %>% dplyr::select(E.dPsi., type) %>% group_by(type) %>% t_test(E.dPsi. ~ 1, mu = 0) %>% adjust_pvalue() %>%  add_significance() %>% mutate(y.position = 1)
+vast_tools.splicingtype_test
+vast_tools.all_type_order <- filter(ac_who_vcp_vs_ctrl.VASTTOOLS, MV0.1 == "significant") %>% group_by(type) %>% tally %>% arrange(n) %>%  pull(type)
+vast_tools.all_splice_ordered <- filter(ac_who_vcp_vs_ctrl.VASTTOOLS, MV0.1 == "significant") %>% mutate(type = factor(type, levels = vast_tools.all_type_order))
+vast_tools.sinaplot_splice_types <- ggplot(vast_tools.all_splice_ordered, aes(x = type, y= E.dPsi., color = type)) + geom_violin() + geom_sina(size = 0.5) + 
+  geom_boxplot(data = vast_tools.all_splice_ordered, aes(fill = type), colour = "black", width=0.1, outlier.shape = NA) +
+  # scale_colour_manual(values = rev(get_palette("npg",4))) + scale_fill_manual(values = rev(get_palette("npg",4))) +
+  scale_colour_manual(values = get_palette("npg",4)) + scale_fill_manual(values = get_palette("npg",4)) +
+  theme_classic() + theme(legend.position = "none", axis.text.y=element_text(size=10)) +
+  geom_hline(yintercept =0, linetype = 2) + coord_flip() +# ylim(c(-1,1)) +
+  geom_segment(aes(x = 0.6, xend = 0.6, y= 0.7, yend= 1), arrow=arrow(length=unit(0.4,"cm")), color = "dodgerblue3") +
+  geom_segment(aes(x = 0.6, xend = 0.6, y= -0.7, yend= -1),arrow=arrow(length=unit(0.4,"cm")), color = "firebrick2") +
+  annotate("text", x = 0.7, y = 0.5, label = "Up in VCP", color = "dodgerblue3") +   annotate("text", x = 0.7, y = -0.5, label = "Down in VCP", color = "firebrick2") +
+  stat_pvalue_manual(vast_tools.splicingtype_test, label = "p.adj.signif", xmin = "type", xmax = NULL, hide.ns = TRUE) + # add manually p values from binomial test
+  ylab(label = expression(Delta~PSI~VCP-CTRL) ) + xlab("")
+vast_tools.sinaplot_splice_types
+
+# E SGSeq splicing modes
+res.events <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/sgseq/annotated/ac_who_vcp_vs_ctrl/res.events.RDS")
+res.events$type_translation <- gsub("retained intron", "intron retention", res.events$type_translation)
+res.events$type_translation <- gsub("cassette exon", "exon skipping", res.events$type_translation)
+type_order <- res.events %>% filter( status_strict != "none_significant" ) %>% group_by(type_translation) %>% tally %>% arrange(n) %>%  pull(type_translation)
+type_counts <- res.events %>% filter(status_strict != "none_significant") %>% mutate(type_translation = factor(type_translation, levels = type_order)) %>%
+  mutate(status_strict = factor(status_strict, levels = c("significant", "none_significant"))) %>% group_by( status_strict, type_translation) %>% tally(name = "typecount") %>% ungroup()
+splicingtype_test <- filter(res.events, type_translation %in% c("alternative start", "intron retention", "alternate first exon", "alternate end", " alternate last exon", "alternate 3'", "alternate 5'", "exon skipping")) %>% dplyr::select(lfc, type_translation) %>% group_by(type_translation) %>% t_test(lfc ~ 1, mu = 0) %>% adjust_pvalue() %>%  add_significance() %>% mutate(y.position = 1)
+splicingtype_test
+all_type_order <- filter(res.events, type_translation %in% c("alternative start", "intron retention", "alternate first exon", "alternate end", " alternate last exon", "alternate 3'", "alternate 5'", "exon skipping")) %>% group_by(type_translation) %>% tally %>% arrange(n) %>%  pull(type_translation)
+all_splice_ordered <- filter(res.events, type_translation %in% c("alternative start", "intron retention", "alternate first exon", "alternate end", " alternate last exon", "alternate 3'", "alternate 5'", "exon skipping")) %>% mutate(type = factor(type_translation, levels = all_type_order))
+sgseq.sinaplot_splice_types <- ggplot(all_splice_ordered, aes(x = type_translation, y= lfc, color = type_translation)) + geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = all_splice_ordered, aes(fill = type_translation), colour = "black", width=0.1, outlier.shape = NA) +
+  scale_colour_manual(values = get_palette("npg",7)) + scale_fill_manual(values = get_palette("npg",7)) +
+  theme_classic() + theme(legend.position = "none", axis.text.y=element_text(size=10)) +
+  geom_hline(yintercept =0, linetype = 2) + coord_flip() + ylim(c(-1,1)) +
+  geom_segment(aes(x = 0.6, xend = 0.6, y= 0.7, yend= 1), arrow=arrow(length=unit(0.4,"cm")), color = "dodgerblue3") +
+  geom_segment(aes(x = 0.6, xend = 0.6, y= -0.7, yend= -1),arrow=arrow(length=unit(0.4,"cm")), color = "firebrick2") +
+  annotate("text", x = 0.7, y = 0.5, label = "Up in VCP", color = "dodgerblue3") +   annotate("text", x = 0.7, y = -0.5, label = "Down in VCP", color = "firebrick2") +
+  stat_pvalue_manual(splicingtype_test, label = "p.adj.signif", xmin = "type_translation", xmax = NULL, hide.ns = TRUE) + # add manually p values from binomial test
+  ylab(label = expression(Log[2]~foldchange~VCP:CTRL) ) + xlab("")
+sgseq.sinaplot_splice_types
+```
+
+### Merge
+
+Astrocyte differentiation Biorender figure merged in illustrator
+
+```{r}
+figS1.merged <- ggarrange(
+  ac_who_pca,
+  ggarrange(ac_who_dendrogram, ac_who_vcp_vs_ctrl.DGE_only.go_curated, nrow = 1, ncol = 2, widths = c(0.5,1), labels = c("C", "D")),
+  vast_tools.sinaplot_splice_types,
+  sgseq.sinaplot_splice_types,
+  nrow = 4, heights = c(2, 1.3, 1.5, 1.8), labels = c("B", "", "E", "F"))
+figS1.merged
+ggsave(figS1.merged, filename = "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/irlib/figures/figS1.merged.png", height = 10, width = 8.25)
+```
+
+## Figure S2
+
+```{r}
+# F VCP reliable events
+ac_who_vcp_ctrl.reliability_histogram <- histogram_plot_irfinder(ctrl = ac_who_ctrl.IR, mutant = ac_who_vcp.IR, control = "CTRL", condition = "VCP")
+ac_who_vcp_ctrl.reliability_histogram
+
+# G C9ORF72 reliable events
+ac_bir_ctrl.filt <- ac_bir_ctrl.IR %>% dplyr::select(Chr, Start, End, Name, Strand, IRratio, gene_name, reliable) %>% mutate(condition = "CTRL")
+ac_bir_c9orf.filt <- ac_bir_c9orf.IR %>% dplyr::select(Chr, Start, End, Name, Strand, IRratio, gene_name, reliable) %>% mutate(condition = "C9ORF72")
+ac_bir_ctrl_c9orf.filt <- ac_bir_ctrl.filt %>% bind_rows(ac_bir_c9orf.filt) %>% mutate(condition = factor(condition, levels = c("CTRL", "C9ORF72")))
+C9ORF72.reliability_histogram <- ggplot(filter(ac_bir_ctrl_c9orf.filt, IRratio > 0), aes(x = IRratio, fill = reliable)) + 
+      geom_histogram(colour="black", position="dodge",binwidth=0.03) +  theme_bw() + theme(strip.background = element_rect(colour="black", fill="white"), panel.grid = element_blank(), legend.position = "right") + labs(fill = expression(Coverage)) + 
+      geom_vline(xintercept = 0.1, linetype = 3, colour = "darkgrey")  + facet_grid(. ~ condition) + scale_fill_manual( values = c("dodgerblue", "firebrick2") )
+C9ORF72.reliability_histogram
+
+# H SOD1 reliable events
+SOD1.reliability_histogram <- histogram_plot_irfinder(ctrl = ac_tyz_ctrl.IR, mutant = ac_tyz_sod1.IR, control = "CTRL", condition = "SOD1")
+SOD1.reliability_histogram
+
+# I Treated reactive reliable events
+ac_bar_a0.filt <- ac_bar_a0.IR %>% dplyr::select(Chr, Start, End, Name, Strand, IRratio, gene_name, reliable) %>% mutate(condition = "Untreated CTRL")
+ac_bar_a1.filt <- ac_bar_a1.IR %>% dplyr::select(Chr, Start, End, Name, Strand, IRratio, gene_name, reliable) %>% mutate(condition = "Treated Reactive")
+ac_bar_a1_a0.filt <- ac_bar_a0.filt %>% bind_rows(ac_bar_a1.filt) %>% mutate(condition = factor(condition, levels = c("Untreated CTRL", "Treated Reactive")))
+reactivite.reliability_histogram <- ggplot(filter(ac_bar_a1_a0.filt, IRratio > 0), aes(x = IRratio, fill = reliable)) + 
+      geom_histogram(colour="black", position="dodge",binwidth=0.03) +  theme_bw() + theme(strip.background = element_rect(colour="black", fill="white"), panel.grid = element_blank(), legend.position = "right") + labs(fill = expression(Coverage)) + 
+      geom_vline(xintercept = 0.1, linetype = 3, colour = "darkgrey")  + facet_grid(. ~ condition) + scale_fill_manual( values = c("dodgerblue", "firebrick2") )
+reactivite.reliability_histogram
+
+# J Differential IR characteristics IR up vs IR down
+VCP <- ac_who_vcp_vs_ctrl %>% dplyr::select(Intron.GeneName.GeneID.Coords, coords, ensID, gene_name, Chr, Start, End, Direction, gc_content, intron_length, p0.05_reliable, VCP.p0.05_reliable_IRdirection = p0.05_reliable_IRdirection) %>% filter(p0.05_reliable == "significant")
+SOD1 <- ac_tyz_sod1_vs_ctrl %>% dplyr::select(Intron.GeneName.GeneID.Coords, coords, ensID, gene_name, Chr, Start, End, Direction,p0.05_reliable, SOD1.p0.05_reliable_IRdirection = p0.05_reliable_IRdirection, gc_content, intron_length)  %>% filter(p0.05_reliable == "significant")
+C9ORF72 <- ac_bir_c9orf_vs_ctrl %>% dplyr::select(Intron.GeneName.GeneID.Coords, coords, ensID, gene_name, Chr, Start, End, Direction,p0.05_reliable, C9ORF72.p0.05_reliable_IRdirection = p0.05_reliable_IRdirection, gc_content, intron_length) %>% filter(p0.05_reliable == "significant")
+A1 <- ac_bar_a1_vs_a0 %>% dplyr::select(Intron.GeneName.GeneID.Coords, coords, ensID, gene_name, Chr, Start, End, Direction, p0.05_reliable, A1.p0.05_reliable_IRdirection = p0.05_reliable_IRdirection, gc_content, intron_length) %>% filter(p0.05_reliable == "significant")
+
+differential.4datasets.IR <- VCP %>% full_join(SOD1, by = c("Intron.GeneName.GeneID.Coords", "coords", "ensID", "gene_name", "Chr", "Start", "End", "Direction", "gc_content", "intron_length")) %>%
+  full_join(C9ORF72, by = c("Intron.GeneName.GeneID.Coords", "coords", "ensID", "gene_name", "Chr", "Start", "End", "Direction", "gc_content", "intron_length")) %>%
+  full_join(A1, by = c("Intron.GeneName.GeneID.Coords", "coords", "ensID", "gene_name", "Chr", "Start", "End", "Direction", "gc_content", "intron_length")) %>% 
+  mutate(p0.05_reliable_IRdirection = case_when(VCP.p0.05_reliable_IRdirection == "IR down" | SOD1.p0.05_reliable_IRdirection == "IR down" | C9ORF72.p0.05_reliable_IRdirection == "IR down" | A1.p0.05_reliable_IRdirection == "IR down" ~ "IR down", TRUE ~ "IR up"))
+
+gc.differential.sina_plot <- sinaplot(data = differential.4datasets.IR, groups = "p0.05_reliable_IRdirection", continuous = "gc_content", dashed.line = 0.5) + ylim(c(0,1)) + ylab(label = expression(GC~content) ) + xlab("") #+ theme(axis.title = element_text(size=10), axis.text = element_text(size=6))
+gc.differential.sina_plot
+
+length.differential.sina_plot <- sinaplot(data = differential.4datasets.IR, groups = "p0.05_reliable_IRdirection", continuous = "intron_length", dashed.line = "NA", stat.y.position = 4.5, stats.test = "wilcox_test") + #ylim(c(0,1)) + 
+  ylab(label = expression(log[10]~intron~length) ) + xlab("") + scale_y_log10() #+ theme(axis.title = element_text(size=10), axis.text = element_text(size=6))
+length.differential.sina_plot
+
+gr_introns <- as.GenomicRange(differential.4datasets.IR$Intron.GeneName.GeneID.Coords)
+seqlevelsStyle(gr_introns) <- "UCSC"
+differential.4datasets.IR$phast_cons <- gscores(phast, gr_introns)$default # takes ~1min - too slow to add to function
+PhastCons.differential.sina_plot <- sinaplot(data = differential.4datasets.IR, groups = "p0.05_reliable_IRdirection", continuous = "phast_cons", dashed.line = "NA", stat.y.position = 0.5, stats.test = "t_test") + ylab(label = expression(log[10]~PhastCons~score) ) + xlab("") + scale_y_log10() #+ theme(axis.title = element_text(size=10), axis.text = element_text(size=6))
+PhastCons.differential.sina_plot
+
+clip_hepg2 <- list.files("/camp/home/ziffo/home/genomes/clip-bedgraphs/HepG2/")
+clip_hepg2 <- clip_hepg2[!grepl("3nt_peaks",clip_hepg2)] # only assess raw crosslink files without any peak calling for enrichment
+grange_introns <- as.GenomicRange(differential.4datasets.IR$Intron.GeneName.GeneID.Coords) # create GRanges for each intron (both retained and non retained)
+intron_coords <- tibble(intron = 1:length(differential.4datasets.IR$coords), coords = differential.4datasets.IR$coords) # intron coordinates for to enable matching back to original coords in IRFinder dataframe
+coverage_list_who <- list()
+for (i in seq_along(clip_hepg2)) {
+  print(clip_hepg2[[i]])
+  rbp <- str_remove(clip_hepg2[[i]], ".merged.bed.gz")
+  bed <- import(paste("/camp/home/ziffo/home/genomes/clip-bedgraphs/HepG2/", clip_hepg2[[i]],sep=""))
+  seqlevelsStyle(bed) <- "NCBI" # remove "chr"
+  grange_overlap <- findOverlaps(query = grange_introns, subject=bed, ignore.strand=FALSE) # find overlaps between RBP binding sites & retained introns
+  range <- bed[ queryHits(grange_overlap) ] %>% as.data.frame() # subset iCLIP xlinks that overlap with the introns - 50,287 rows each with a xlinks score. There are 8739 introns - many introns have multiple scores.
+  coverage_list_who[[i]] <- range %>%  mutate( intron = queryHits(grange_overlap)) %>%  group_by(intron) %>% summarise(iclip_score = sum(score) ) # sum the scores for each intron - 4266 introns with scores, remaining introns have 0 scores
+  coverage_list_who[[i]]$iclip_score[is.na(coverage_list_who[[i]]$iclip_score)]<-0 # set NA scores to 0
+  coverage_list_who[[i]] <- coverage_list_who[[i]] %>% left_join(intron_coords, by = "intron") # add intron coordinates to match back to IRFinder results
+  names(coverage_list_who)[i] <- rbp
+}
+saveRDS(coverage_list_who, "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/coverage_list_who.absolute_IR.differential.4datasets.IR.CLIPscores.RDS")
+
+
+
+coverage_list_who_df <- bind_rows(coverage_list_who, .id = "intron") # collapse list of dataframes into a single df
+iclip_scores <- coverage_list_who_df %>% distinct() %>% group_by(intron, coords) %>% # each column becomes an RBP. Each row is an intron - there are 310,450 in IRFinder but only 155,313 have xlink scores.
+  summarise(iclip_score.sum = sum(iclip_score)) %>% # https://stackoverflow.com/questions/63365516/tidyr-pivot-wider-error-cant-convert-double-to-list
+  tidyr::pivot_wider(names_from = intron, values_from = iclip_score.sum, values_fill = 0)
+# iclip_scores <- pivot_wider(coverage_list_who_df, names_from = intron, values_from = iclip_score, values_fill = 0)
+iclip_scores <- differential.4datasets.IR %>% dplyr::select(coords) %>% full_join(iclip_scores, by = "coords") # add back the introns without xlink scores
+iclip_scores[is.na(iclip_scores)] <- 0  # set NA scores to 0
+iclip_scores <- na.omit(iclip_scores)
+iclip_scores <- iclip_scores %>% left_join(select(differential.4datasets.IR, coords, intron_length), by = c("coords"))
+# iclip_scores$intron_length <- differential.4datasets.IR$intron_length[differential.4datasets.IR$coords %in% iclip_scores$coords] # add intron_length to df
+iclip_scores_normalised <- iclip_scores %>% mutate_if(is.numeric, ~ (./intron_length)) %>% dplyr::select(-intron_length) # normalise all scores for intron_length
+iclip_scores_normalised$sum <- iclip_scores_normalised %>% select_if(is.numeric) %>% rowSums # sum all normalised RBP scores for each intron
+saveRDS(iclip_scores_normalised, "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/absolute_IR.differential.4datasets.IR.CLIPscores.RDS")
+iclip_scores_normalised <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/differential.4datasets.IR.CLIPscores.RDS")
+differential.4datasets.IR <- differential.4datasets.IR %>% left_join(select(iclip_scores_normalised, sum, coords), by = "coords")
+# differential.4datasets.IR$iclip_enrichment <- iclip_scores_normalised$sum[iclip_scores_normalised$coords %in% differential.4datasets.IR$coords] # add normalised sum of sums of RBP xlinks to IRFinder results
+clip.differential.sina_plot <- sinaplot(data = differential.4datasets.IR, groups = "p0.05_reliable_IRdirection", continuous = "sum", dashed.line = "NA", stat.y.position = 2, stats.test = "t_test") + #ylim(c(0,1)) + 
+  ylab(label = expression(log[10]~iCLIP~xlinks~score) ) + xlab("") + scale_y_log10() #+ theme(axis.title = element_text(size=10), axis.text = element_text(size=6))
+clip.differential.sina_plot
+```
+
+### Merge
+
+```{r}
+figS2.merged <- ggarrange(
+  ac_who_vcp_ctrl.reliability_histogram,
+  C9ORF72.reliability_histogram,
+  SOD1.reliability_histogram,
+  reactivite.reliability_histogram,
+  ggarrange(gc.differential.sina_plot, length.differential.sina_plot, PhastCons.differential.sina_plot, clip.differential.sina_plot, nrow = 1, ncol = 4, widths = c(1,1,1,1)), # notNMD.differential.sina_plot
+  nrow = 5, heights = c(1,1,1,1,1.5), labels = c("A", "B", "C", "D", "E"))
+figS2.merged
+ggsave(figS2.merged, filename = "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/irlib/figures/figS2.merged.png", height = 11.75, width = 8.25)
+```
+
+## Table S2
+
+Differentially expressed genes in VCP mutant astrocytes
+
+```{r}
+# dge_res_ac_who_vcp_vs_ctrl.FDR0.05 created in Figure S1A
+readr::write_csv(select(dge_res_ac_who_vcp_vs_ctrl.FDR0.05, gene_name, everything()), path=paste("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/ac_who_vcp_vs_ctrl_deseq2_results.FDR0.05.csv", sep = ""))
+```
+
+## Table S4
+
+Overlap IR between datasets
+
+```{r}
+IRdown_VCP <- ac_who_vcp_vs_ctrl %>% filter(p0.05_reliable == "significant" & IRdirection == "down") %>% pull(gene_name) %>% unique
+IRdown_SOD1 <- ac_tyz_sod1_vs_ctrl %>% filter(p0.05_reliable == "significant" & IRdirection == "down") %>% pull(gene_name) %>% unique
+IRdown_C9ORF72 <- ac_bir_c9orf_vs_ctrl %>% filter(p0.05_reliable == "significant" & IRdirection == "down") %>% pull(gene_name) %>% unique
+unique(c(IRdown_VCP, IRdown_C9ORF72)) # 834 genes
+IRdown_ALS <- unique(c(IRdown_VCP,IRdown_SOD1, IRdown_C9ORF72)) # 834 genes
+IRdown_A1 <- ac_bar_a1_vs_a0 %>% filter(p0.05_reliable == "significant" & IRdirection == "down") %>% pull(gene_name) %>% unique # 189 genes
+IRdown_VCP_C9ORF72 <- IRdown_C9ORF72[IRdown_C9ORF72 %in% IRdown_VCP]
+IRdown_VCP_C9ORF72_SOD1 <- IRdown_VCP_C9ORF72[IRdown_VCP_C9ORF72 %in% IRdown_SOD1]
+DGEup_TRAP <- dge_res_ac_mou_sod1_vs_ctrl %>% filter(padj < 0.05) %>% pull(gene_name) %>% toupper %>% unique # 902 genes
+DGEup_TRAP <- unique(DGEup_TRAP[DGEup_TRAP %in% gtf$gene_name]) # 765 / 902 have a human gene ID
+
+IRdown_A1_ALS <- IRdown_A1[IRdown_A1 %in% IRdown_ALS] 
+IRdown_overlap <- cbindX(arrange(as_tibble_col(IRdown_SOD1[IRdown_SOD1 %in% IRdown_VCP], column_name = "SOD1_VCP"), SOD1_VCP), 
+                         arrange(as_tibble_col(IRdown_C9ORF72[IRdown_C9ORF72 %in% IRdown_VCP], column_name = "C9ORF72_VCP"), C9ORF72_VCP),  
+                         arrange(as_tibble_col(IRdown_VCP_C9ORF72[IRdown_VCP_C9ORF72 %in% IRdown_SOD1], column_name = "SOD1_C9ORF72_VCP"), SOD1_C9ORF72_VCP),  
+                         arrange(as_tibble_col(IRdown_A1[IRdown_A1 %in% IRdown_ALS], column_name = "Reactive_any.ALS"), Reactive_any.ALS),  
+                         arrange(as_tibble_col(IRdown_A1[IRdown_A1 %in% IRdown_VCP_C9ORF72_SOD1], column_name = "Reactive_all.ALS"), Reactive_all.ALS),
+                         arrange(as_tibble_col(DGEup_TRAP[DGEup_TRAP %in% IRdown_ALS], column_name = "SOD1G37R.TRAP_ALS"), SOD1G37R.TRAP_ALS), 
+                         arrange(as_tibble_col(DGEup_TRAP[DGEup_TRAP %in% IRdown_A1], column_name = "SOD1G37R.TRAP_Reactive"), SOD1G37R.TRAP_Reactive))
+IRdown_overlap[is.na(IRdown_overlap)] <- ""
+write.csv(IRdown_overlap, "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/irlib/results/IR_down.overlap.csv")
+```
+
+## Figure 2
+
+```{r}
+# 2A Sina plot DGE vs IR up/down in VCP, C9orf72, SOD1, reactivity
+vcp <- ac_who_vcp_vs_ctrl %>% dplyr::filter(p0.05_reliable == "significant") %>% dplyr::select(Intron.GeneName.GeneID, Chr, Start, End, gene_name, ensID, p.diff, IRratio.diff, p0.05_reliable_IRdirection, log2FoldChange) %>% mutate(mutation = "VCP - CTRL")
+sod1 <-ac_tyz_sod1_vs_ctrl %>% dplyr::filter(p0.05_reliable == "significant") %>% dplyr::select(Intron.GeneName.GeneID, Chr, Start, End, gene_name, ensID, p.diff, IRratio.diff, p0.05_reliable_IRdirection, log2FoldChange) %>% mutate(mutation = "SOD1 - CTRL")
+c9orf <- ac_bir_c9orf_vs_ctrl %>% dplyr::filter(p0.05_reliable == "significant") %>% dplyr::select(Intron.GeneName.GeneID, Chr, Start, End, gene_name, ensID, p.diff, IRratio.diff, p0.05_reliable_IRdirection, log2FoldChange) %>% mutate(mutation = "C9orf72 - CTRL")
+a1 <- ac_bar_a1_vs_a0 %>% dplyr::filter(p0.05_reliable == "significant") %>% dplyr::select(Intron.GeneName.GeneID, Chr, Start, End, gene_name, ensID, p.diff, IRratio.diff, p0.05_reliable_IRdirection, log2FoldChange) %>% mutate(mutation = "Reactive - CTRL")
+vcp_sod1_c9orf_a1 <- bind_rows(vcp, sod1, c9orf, a1) %>% mutate(mutation = factor(mutation, levels = c("VCP - CTRL", "C9orf72 - CTRL", "SOD1 - CTRL", "Reactive - CTRL")))
+
+vcp_sod1_c9orf_a1 <- vcp_sod1_c9orf_a1 %>% drop_na(IRratio.diff, log2FoldChange) %>% filter(IRratio.diff != Inf) %>% filter(IRratio.diff != -Inf) %>% filter(log2FoldChange != Inf) %>% filter(log2FoldChange != -Inf) 
+vcp_sod1_c9orf_a1_dge_ir_sina_plot <- ggplot(data = vcp_sod1_c9orf_a1, aes(x = p0.05_reliable_IRdirection, y= log2FoldChange, colour = p0.05_reliable_IRdirection)) + 
+          geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = vcp_sod1_c9orf_a1, aes(fill = p0.05_reliable_IRdirection), colour = "black", width=0.2, outlier.shape = NA) +
+          scale_colour_manual(values = c("dodgerblue3", "firebrick2", "forestgreen")) + scale_fill_manual(values = c("dodgerblue3", "firebrick2", "forestgreen")) +
+          theme_classic() + theme(legend.position = "none", axis.text=element_text(size=10)) +
+          geom_hline(yintercept = 0, linetype = 2) + facet_grid(. ~ mutation) +
+          stat_compare_means(comparisons = list(c("IR down", "IR up")), label = "p.signif", label.y = 1.7, tip.length = 0.01)  + ylim(c(-2,2)) + ylab(label = expression(Gene~exp~LFC) ) + xlab("")
+vcp_sod1_c9orf_a1_dge_ir_sina_plot
+
+# 2F GO terms IR down & DGE up in VCP
+vcp_dge_ir_genes <- ac_who_vcp_vs_ctrl %>% filter(p0.05_reliable == "significant") %>% split(.$direction) %>%  map("ensID") # create list of IR up/down & Expression up/down genes
+vcp_dge_ir_genes <- gost(vcp_dge_ir_genes) # run gprofiler2 on all groups - runs on all KEGG, GO, REAC,TF, WP pathways simultaneously
+vcp_dge_ir_gprofiles_filt <- vcp_dge_ir_genes$result %>% filter(str_detect(source, "KEGG|GO:BP|GO:MF|GO:CC|REAC|CORUM")) %>% arrange( -log10(p_value) ) %>% mutate( term_name = as.factor(term_name)) 
+vcp_dge_ir_gprofiles_curated_irdown_expup <- vcp_dge_ir_gprofiles_filt %>% filter(query == "IR down & expression up")
+paste('"',unique(vcp_dge_ir_gprofiles_curated_irdown_expup$term_name),'",', sep = "", collapse = '\n') %>% cat()
+irdown_expup_curated_list <- c("NIK-->noncanonical NF-kB signaling",
+                               #"Antigen processing-Cross presentation",
+                  "regulation of cell morphogenesis",
+                  "Class I MHC mediated antigen processing & presentation",
+                  # "ECM-receptor interaction",
+                  "Wnt signaling pathway",
+                  # "RNA metabolic process",
+                  "Extracellular matrix organization",
+                  # "ribonucleoprotein complex biogenesis",
+                  "RNA processing",
+                  "cellular response to stress",
+                  "Collagen formation",
+                  # "metabolic process",
+                  "RNA binding",
+                  "cellular metabolic process",
+                  "focal adhesion") #,  "cellular component organization","nucleus", "cytoplasm")#,"protein binding")
+vcp_dge_ir_gprofiles_curated_irdown_expup <- vcp_dge_ir_gprofiles_curated_irdown_expup %>% filter(term_name %in% irdown_expup_curated_list) %>% mutate(query = "")
+vcp_dge_ir_gprofiles_curated_irdown_expup$term_name <- strtrim(vcp_dge_ir_gprofiles_curated_irdown_expup$term_name, 39) # limit term_name string length
+ac_who_vcp_vs_ctrl.go_curated <- curated_profiles(gprofiles = vcp_dge_ir_gprofiles_curated_irdown_expup, colours = "#E64B35FF") + ggtitle("VCP")
+ac_who_vcp_vs_ctrl.go_curated
+
+# 2G GO terms IR down & DGE up in C9ORF72
+bir_c9orf_dge_ir_genes <- filter(ac_bir_c9orf_vs_ctrl, p0.05_reliable == "significant") %>%  split(.$direction) %>%  map("ensID") # create list of IR up/down & Expression up/down genes
+bir_c9orf_dge_ir_genes <- gost(bir_c9orf_dge_ir_genes) # run gprofiler2 on all groups - runs on all KEGG, GO, REAC,TF, WP pathways simultaneously
+bir_c9orf_dge_ir_gprofiles_filt <- bir_c9orf_dge_ir_genes$result %>% filter(str_detect(source, "KEGG|GO:BP|GO:MF|GO:CC|REAC|CORUM")) %>% arrange( -log10(p_value) ) %>% mutate( term_name = as.factor(term_name)) 
+bir_c9orf_dge_ir_gprofiles_curated_irdown_expup <- bir_c9orf_dge_ir_gprofiles_filt %>% filter(query == "IR down & expression up")
+irdown_expup_curated_list <- c("polysomal ribosome",
+"actin binding",
+# "extracellular matrix",
+"cell morphogenesis involved in differentiation",
+"translation",
+"secretory granule",
+# "Collagen formation",
+"response to wounding",
+"cadherin binding",
+"collagen-containing extracellular matrix",
+"cell migration",
+"cell adhesion",
+"RNA binding",
+"response to endoplasmic reticulum stress",
+# "platelet degranulation",
+"Extracellular matrix organization",
+"cellular localization",
+"integrin binding",
+"anchoring junction",
+# "extracellular vesicle",
+"cell-substrate junction",
+"focal adhesion")    
+bir_c9orf_dge_ir_gprofiles_curated_irdown_expup <- bir_c9orf_dge_ir_gprofiles_curated_irdown_expup %>% filter(term_name %in% irdown_expup_curated_list) %>% mutate(query = "")
+bir_c9orf_dge_ir_gprofiles_curated_irdown_expup$term_name <- gsub("response to endoplasmic reticulum stress", "endoplasmic reticulum stress", bir_c9orf_dge_ir_gprofiles_curated_irdown_expup$term_name)
+bir_c9orf_dge_ir_gprofiles_curated_irdown_expup$term_name <- gsub("cell morphogenesis involved in differentiation", "cell morphogenesis", bir_c9orf_dge_ir_gprofiles_curated_irdown_expup$term_name)
+bir_c9orf_dge_ir_gprofiles_curated_irdown_expup$term_name <- gsub("collagen-containing extracellular matrix", "collagen extracellular matrix", bir_c9orf_dge_ir_gprofiles_curated_irdown_expup$term_name)
+ac_bir_c9orf_go_curated <- curated_profiles(gprofiles = bir_c9orf_dge_ir_gprofiles_curated_irdown_expup, colours = "#4DBBD5FF") + ggtitle("C9ORF72")
+ac_bir_c9orf_go_curated
+
+# 2H GO terms IR down & DGE up in SOD1
+tyz_sod1_dge_ir_genes <- filter(ac_tyz_sod1_vs_ctrl,p0.05_reliable == "significant") %>%  split(.$direction) %>%  map("ensID") # create list of IR up/down & Expression up/down genes
+tyz_sod1_dge_ir_genes <- gost(tyz_sod1_dge_ir_genes) # run gprofiler2 on all groups - runs on all KEGG, GO, REAC,TF, WP pathways simultaneously
+tyz_sod1_dge_ir_gprofiles_filt <- tyz_sod1_dge_ir_genes$result %>% filter(str_detect(source, "KEGG|GO:BP|GO:MF|GO:CC|REAC|CORUM")) %>% arrange( -log10(p_value) ) %>% mutate( term_name = as.factor(term_name)) 
+tyz_sod1_dge_ir_gprofiles_curated_irdown_expup <- tyz_sod1_dge_ir_gprofiles_filt %>% filter(query == "IR down & expression up")
+irdown_expup_curated_list <- c("NCAM1 interactions",
+"HSF1 activation",
+"integrin binding",
+"Laminin interactions",
+"extracellular vesicle",
+"anchoring junction",
+"Signaling by PDGF",
+"viral transcription",
+"Influenza Infection",
+"Focal adhesion",
+"Collagen formation",
+"Nonsense-Mediated Decay (NMD)",
+"Viral mRNA Translation",
+"Extracellular matrix organization",
+"cytosolic ribosome",
+"Peptide chain elongation")       
+tyz_sod1_dge_ir_gprofiles_curated_irdown_expup <- tyz_sod1_dge_ir_gprofiles_curated_irdown_expup %>% filter(term_name %in% irdown_expup_curated_list) %>% mutate(query = "")
+ac_tyz_sod1_go_curated <- curated_profiles(gprofiles = tyz_sod1_dge_ir_gprofiles_curated_irdown_expup, colours = "#00A087FF") + ggtitle("SOD1")
+ac_tyz_sod1_go_curated
+
+# 2I GO terms IR down & DGE up in Reactive
+bar_a1_dge_ir_genes <- filter(ac_bar_a1_vs_a0, p0.05_reliable == "significant") %>%  split(.$direction) %>%  map("ensID") # create list of IR up/down & Expression up/down genes
+bar_a1_dge_ir_genes <- gost(bar_a1_dge_ir_genes) # run gprofiler2 on all groups - runs on all KEGG, GO, REAC,TF, WP pathways simultaneously
+bar_a1_dge_ir_gprofiles_filt <- bar_a1_dge_ir_genes$result %>% filter(str_detect(source, "KEGG|GO:BP|GO:MF|GO:CC|REAC|CORUM")) %>% arrange( -log10(p_value) ) %>% mutate( term_name = as.factor(term_name)) 
+bar_a1_dge_ir_gprofiles_curated_irdown_expup <- bar_a1_dge_ir_gprofiles_filt %>% filter(query == "IR down & expression up")
+irdown_expup_curated_list <- c("TANGO1L-cTAGE5-SEC12 complex",
+"cellular metabolic process",
+"protein-containing complex",
+"protein phosphorylation",
+"macromolecule modification",
+"regulation of phosphorylation",
+"nucleus",
+"Metabolism of RNA",
+"nuclear lumen",
+"cytoplasm", "nucleoplasm")
+bar_a1_dge_ir_gprofiles_curated_irdown_expup <- bar_a1_dge_ir_gprofiles_filt %>% filter(query == "IR down & expression up") %>% filter(term_name %in% irdown_expup_curated_list) %>% mutate(query = "")
+ac_bar_a1_go_curated <- curated_profiles(gprofiles = bar_a1_dge_ir_gprofiles_curated_irdown_expup, colours = "#3C5488FF") + ggtitle("Reactive") #+ annotate(geom="text", x=4, y=15, label="IR down & expression up", color="black", fontface = 'italic')
+ac_bar_a1_go_curated
+
+# 2J-M Liddelow heatmaps DGE & IR
+# Annotation for all Liddelow heatmaps
+annot <- data.frame(row.names = astrocyte.reactivity.markers$gene_name, group = factor(astrocyte.reactivity.markers$group))
+annot_cols <- c("black", "firebrick2", "dodgerblue3")
+names(annot_cols) <- unique(astrocyte.reactivity.markers$group)
+annot_cols <- list(group = annot_cols)
+breaksList = seq(-2, 2, by = 0.1) 
+
+# 2J
+vcp_dge_ir_filt <- ac_who_vcp_vs_ctrl.absoluteIR %>% filter(gene_name %in% astrocyte.reactive.genes) %>% arrange(IR.lfc) %>% distinct(gene_name, .keep_all = TRUE) %>% # Use absolute IR results to avoid loosing DGE values where no IR values exist
+  dplyr::select(gene_name, "VCP IR" = IR.lfc, "VCP GE" = log2FoldChange)
+vcp_dge_ir_filt$"VCP IR" <- replace_na(vcp_dge_ir_filt$"VCP IR", 0)
+vcp_dge_ir_filt$"VCP GE" <- replace_na(vcp_dge_ir_filt$"VCP GE", 0)
+vcp_dge_ir_filt <- vcp_dge_ir_filt %>% arrange(factor(gene_name, levels = rownames(annot))) # order the matrix by the annotation dataframe
+vcp_dge_ir_filt.mat <- make_matrix(select(vcp_dge_ir_filt,-gene_name),pull(vcp_dge_ir_filt,gene_name))
+vcp_dge_ir_filt.mat[vcp_dge_ir_filt.mat == -Inf] <- -2.0
+vcp_dge_ir_filt.mat[vcp_dge_ir_filt.mat == Inf] <- 2.0
+vcp_dge_ir_filt.mat[vcp_dge_ir_filt.mat == NA] <- 0
+vcp_dge_ir_filt.mat[vcp_dge_ir_filt.mat > 2.0] <- 2.0
+vcp_dge_ir_filt.mat[vcp_dge_ir_filt.mat < -2.0] <- -2.0
+ac_who_vcp_vs_ctrl.all <- cleanIRFinder(IRFinder = ac_who_vcp_vs_ctrl.IRFinder) %>% full_join(dge_res_ac_who_vcp_vs_ctrl, by = c("ensID", "gene_name")) # full join DESeq to avoid loosing DGE values where no IR values exist
+vcp_dge_res_padj <- ac_who_vcp_vs_ctrl.all %>% filter(gene_name %in% astrocyte.reactive.genes) %>% arrange(IR.lfc) %>% distinct(gene_name, .keep_all = TRUE) %>%
+  mutate(IR.sig = case_when(p0.05_reliable == "significant" ~ "\u2217", TRUE ~ ""), DGE.sig = case_when(padj <= 0.05 ~  "\u2217", TRUE ~ "")) %>%
+  dplyr::select(gene_name, IR.sig, DGE.sig) %>%
+  arrange(factor(gene_name, levels = rownames(annot))) %>% dplyr::select(IR.sig,DGE.sig) %>%  as.matrix  # order the matrix by the annotation dataframe
+ac_who_liddelow_heatmap <- pheatmap(t(vcp_dge_ir_filt.mat), cluster_rows=F, show_rownames=T, show_colnames = T, cluster_cols=F, fontsize = 8, gaps_col = c(13,29), gaps_row = 1,
+                  annotation_col = annot, annotation_names_col = F, annotation_legend = FALSE, annotation_colors = annot_cols, main = "", display_numbers = t(vcp_dge_res_padj), 
+                  color = colorRampPalette(rev(greenred(75)))(length(breaksList)),breaks = breaksList, cellheight = 9, cellwidth = 12, border_color=NA, legend = TRUE)
+
+# 2K Liddelow heatmap DGE & IR in C9ORF72
+c9orf_dge_ir_filt <- ac_bir_c9orf_vs_ctrl.absoluteIR %>% filter(gene_name %in% astrocyte.reactive.genes) %>% arrange(IR.lfc) %>% distinct(gene_name, .keep_all = TRUE) %>%
+  dplyr::select(gene_name, "C9ORF72 IR" = IR.lfc, "C9ORF72 GE" = log2FoldChange)
+c9orf_dge_ir_filt$"C9ORF72 IR" <- replace_na(c9orf_dge_ir_filt$"C9ORF72 IR", 0)
+c9orf_dge_ir_filt$"C9ORF72 GE" <- replace_na(c9orf_dge_ir_filt$"C9ORF72 GE", 0)
+c9orf_dge_ir_filt <- c9orf_dge_ir_filt %>% arrange(factor(gene_name, levels = rownames(annot))) # order the matrix by the annotation dataframe
+c9orf_dge_ir_filt.mat <- make_matrix(select(c9orf_dge_ir_filt,-gene_name),pull(c9orf_dge_ir_filt,gene_name))
+c9orf_dge_ir_filt.mat[c9orf_dge_ir_filt.mat == -Inf] <- -2.0
+c9orf_dge_ir_filt.mat[c9orf_dge_ir_filt.mat == Inf] <- 2.0
+c9orf_dge_ir_filt.mat[c9orf_dge_ir_filt.mat == NA] <- 0
+c9orf_dge_ir_filt.mat[c9orf_dge_ir_filt.mat > 2.0] <- 2.0
+c9orf_dge_ir_filt.mat[c9orf_dge_ir_filt.mat < -2.0] <- -2.0
+ac_bir_c9orf_vs_ctrl.all <- cleanIRFinder(IRFinder = ac_bir_c9orf_vs_ctrl.IRFinder) %>% full_join(dge_res_ac_bir_c9orf_vs_ctrl, by = c("ensID", "gene_name")) # FULL join deseq2 to avoid loosing DGE values with no IR values
+bir_dge_res_padj <- ac_bir_c9orf_vs_ctrl.all %>% filter(gene_name %in% astrocyte.reactive.genes) %>% arrange(IR.lfc) %>% distinct(gene_name, .keep_all = TRUE) %>%
+  mutate(IR.sig = case_when(p0.05_reliable == "significant" ~ "\u2217", TRUE ~ ""), DGE.sig = case_when(padj <= 0.05 ~  "\u2217", TRUE ~ "")) %>%
+  dplyr::select(gene_name, IR.sig, DGE.sig) %>%
+  arrange(factor(gene_name, levels = rownames(annot))) %>% dplyr::select(IR.sig,DGE.sig) %>%  as.matrix  # order the matrix by the annotation dataframe
+ac_c9orf_liddelow_heatmap <- pheatmap(t(c9orf_dge_ir_filt.mat), cluster_rows=F, show_rownames=T, show_colnames = T, cluster_cols=F, fontsize = 8, gaps_col = c(13,29), gaps_row = 1,
+                  annotation_col = annot, annotation_names_col = F, annotation_legend = FALSE, annotation_colors = annot_cols, main = "", display_numbers = t(bir_dge_res_padj), 
+                  color = colorRampPalette(rev(greenred(75)))(length(breaksList)),breaks = breaksList, cellheight = 9, cellwidth = 12, border_color=NA, legend = FALSE)
+
+# 2L Liddelow heatmap DGE & IR in SOD1
+sod1_dge_ir_filt <- ac_tyz_sod1_vs_ctrl.absoluteIR %>% filter(gene_name %in% astrocyte.reactive.genes) %>% arrange(IR.lfc) %>% distinct(gene_name, .keep_all = TRUE) %>%
+  dplyr::select(gene_name, "SOD1 IR" = IR.lfc, "SOD1 GE" = log2FoldChange)
+sod1_dge_ir_filt$"SOD1 IR" <- replace_na(sod1_dge_ir_filt$"SOD1 IR", 0)
+sod1_dge_ir_filt$"SOD1 GE" <- replace_na(sod1_dge_ir_filt$"SOD1 GE", 0)
+sod1_dge_ir_filt <- sod1_dge_ir_filt %>% arrange(factor(gene_name, levels = rownames(annot))) # order the matrix by the annotation dataframe
+sod1_dge_ir_filt.mat <- make_matrix(select(sod1_dge_ir_filt,-gene_name),pull(sod1_dge_ir_filt,gene_name))
+sod1_dge_ir_filt.mat[sod1_dge_ir_filt.mat == -Inf] <- -2.0
+sod1_dge_ir_filt.mat[sod1_dge_ir_filt.mat == Inf] <- 2.0
+sod1_dge_ir_filt.mat[sod1_dge_ir_filt.mat == NA] <- 0
+sod1_dge_ir_filt.mat[sod1_dge_ir_filt.mat > 2.0] <- 2.0
+sod1_dge_ir_filt.mat[sod1_dge_ir_filt.mat < -2.0] <- -2.0
+ac_tyz_sod1_vs_ctrl.all <- cleanIRFinder(IRFinder = ac_tyz_sod1_vs_ctrl.IRFinder) %>% full_join(dge_res_ac_tyz_sod1_vs_ctrl, by = c("ensID", "gene_name")) # FULL join deseq2 to avoid loosing DGE values with no IR values
+tyz_dge_res_padj <- ac_tyz_sod1_vs_ctrl.all %>% filter(gene_name %in% astrocyte.reactive.genes) %>% arrange(IR.lfc) %>% distinct(gene_name, .keep_all = TRUE) %>%
+  mutate(IR.sig = case_when(p0.05_reliable == "significant" ~ "\u2217", TRUE ~ ""), DGE.sig = case_when(padj <= 0.05 ~  "\u2217", TRUE ~ "")) %>%
+  dplyr::select(gene_name, IR.sig, DGE.sig) %>%
+  arrange(factor(gene_name, levels = rownames(annot))) %>% dplyr::select(IR.sig,DGE.sig) %>%  as.matrix  # order the matrix by the annotation dataframe
+ac_sod1_liddelow_heatmap <- pheatmap(t(sod1_dge_ir_filt.mat), cluster_rows=F, show_rownames=T, show_colnames = T, cluster_cols=F, fontsize = 8,
+                  gaps_col = c(13,29), gaps_row = 1,
+                  annotation_col = annot, annotation_names_col = F, annotation_legend = FALSE, annotation_colors = annot_cols, main = "", display_numbers = t(tyz_dge_res_padj), 
+                  color = colorRampPalette(rev(greenred(75)))(length(breaksList)),breaks = breaksList,
+                  cellheight = 9, cellwidth = 12, border_color=NA, legend = FALSE)
+
+
+# 2M Liddelow heatmap DGE & IR in Reactive
+a1_dge_ir_filt <- ac_bar_a1_vs_a0.absoluteIR %>% filter(gene_name %in% astrocyte.reactive.genes) %>% arrange(IR.lfc) %>% distinct(gene_name, .keep_all = TRUE) %>%
+  dplyr::select(gene_name, "Reactive IR" = IR.lfc, "Reactive GE" = log2FoldChange)
+a1_dge_ir_filt$"Reactive IR" <- replace_na(a1_dge_ir_filt$"Reactive IR", 0)
+a1_dge_ir_filt$"Reactive GE" <- replace_na(a1_dge_ir_filt$"Reactive GE", 0)
+a1_dge_ir_filt <- a1_dge_ir_filt %>% arrange(factor(gene_name, levels = rownames(annot))) # order the matrix by the annotation dataframe
+a1_dge_ir_filt.mat <- make_matrix(select(a1_dge_ir_filt,-gene_name),pull(a1_dge_ir_filt,gene_name))
+a1_dge_ir_filt.mat[a1_dge_ir_filt.mat == -Inf] <- -2.0
+a1_dge_ir_filt.mat[a1_dge_ir_filt.mat == Inf] <- 2.0
+a1_dge_ir_filt.mat[a1_dge_ir_filt.mat == NA] <- 0
+a1_dge_ir_filt.mat[a1_dge_ir_filt.mat > 2.0] <- 2.0
+a1_dge_ir_filt.mat[a1_dge_ir_filt.mat < -2.0] <- -2.0
+ac_bar_a1_vs_a0.all <- cleanIRFinder(IRFinder = ac_bar_a1_vs_a0.IRFinder) %>% full_join(dge_res_ac_bar_a1_vs_a0, by = c("ensID", "gene_name")) # FULL join deseq2 to avoid loosing DGE values with no IR values
+dge_res_padj <- ac_bar_a1_vs_a0.all %>% filter(gene_name %in% astrocyte.reactive.genes) %>% arrange(IR.lfc) %>% distinct(gene_name, .keep_all = TRUE) %>%
+  mutate(IR.sig = case_when(p0.05_reliable == "significant" ~ "\u2217", TRUE ~ ""), DGE.sig = case_when(padj <= 0.05 ~  "\u2217", TRUE ~ "")) %>%
+  dplyr::select(gene_name, IR.sig, DGE.sig) %>%
+  arrange(factor(gene_name, levels = rownames(annot))) %>% dplyr::select(IR.sig,DGE.sig) %>%  as.matrix 
+ac_a1_liddelow_heatmap <- pheatmap(t(a1_dge_ir_filt.mat), cluster_rows=F, show_rownames=T, show_colnames = T, cluster_cols=F, fontsize = 8,
+                  gaps_col = c(13,29), gaps_row = 1,
+                  annotation_col = annot, annotation_names_col = F, annotation_legend = FALSE, annotation_colors = annot_cols, main = "", display_numbers = t(dge_res_padj), 
+                  color = colorRampPalette(rev(greenred(75)))(length(breaksList)),breaks = breaksList,
+                  cellheight = 9, cellwidth = 12, border_color=NA, legend = FALSE)
+```
+
+### Merge
+
+```{r}
+fig2.merged <- ggarrange(
+  vcp_sod1_c9orf_a1_dge_ir_sina_plot,
+  ggarrange(NULL, ac_who_vcp_vs_ctrl.go_curated, ac_bir_c9orf_go_curated, ncol = 3, labels = c("", "B", "C"), widths = c(0.05, 1,1)),
+  ggarrange(NULL, ac_tyz_sod1_go_curated, ac_bar_a1_go_curated, ncol = 3, labels = c("", "D", "E"), widths = c(0.05, 1,1)),
+  NULL,
+  ggarrange(
+    annotate_figure(ac_who_liddelow_heatmap[[4]],  bottom = text_grob("Pan-reactive                                           A1                                                     A2", color = "black", hjust = 0.6, vjust = -10, x = 0.5, face = "italic", size = 10)),
+    annotate_figure(ac_c9orf_liddelow_heatmap[[4]],  bottom = text_grob("Pan-reactive                                           A1                                                     A2", color = "black", hjust = 0.6, vjust = -10, x = 0.5, face = "italic", size = 10)),
+    annotate_figure(ac_sod1_liddelow_heatmap[[4]],  bottom = text_grob("Pan-reactive                                           A1                                                     A2", color = "black", hjust = 0.6, vjust = -10, x = 0.5, face = "italic", size = 10)), 
+    annotate_figure(ac_a1_liddelow_heatmap[[4]],  bottom = text_grob("Pan-reactive                                           A1                                                     A2", color = "black", hjust = 0.6, vjust = -10, x = 0.5, face = "italic", size = 10)), 
+    labels = c("F", "G", "H", "I"), nrow = 4, heights = c(1,1,1,1)),
+  nrow = 5, heights = c(1.4,1.2,0.9,0.02,2), labels = c("A", "", "", "", "", "")) # rows 5-7
+fig2.merged
+ggsave(fig2.merged, filename = "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/irlib/figures/fig2.merged.annot.png", height = 11.75, width = 8.25)
+```
+
+## Figure S3
+
+```{r}
+# 2B Scatter delta IR ratio vs DGE in VCP
+ac_who_vcp_vs_ctrl.labels.DGE.IR <- c("COL1A1", "FN1", "FLNA", "PDLIM7", "TNC", "ILK", " MCAM", "HLA-B", "HLA-C", "ADAMTSL4", "TGFB1I1", "LAMB2", "ANKZF1", "OSMR", "LOXL3", "RECK", "COL7A1", "UBN1",  "ADAM19")
+labels_lenient <- filter(ac_who_vcp_vs_ctrl, p0.05_reliable == "significant") %>% filter(gene_name %in% ac_who_vcp_vs_ctrl.labels.DGE.IR) %>% arrange( -(abs(IRratio.diff)) ) %>% distinct(gene_name, .keep_all = TRUE)
+ac_who_dge_ir_scatter <- ggplot(filter(ac_who_vcp_vs_ctrl, p0.05_reliable == "significant"), aes( x = IRratio.diff, y = log2FoldChange,  label = gene_name, colour = log10(baseMean))) + 
+  geom_point(alpha = 0.5, size = 0.5) +  theme_bw() +  xlab( expression( Delta~IR~ratio~VCP-CTRL)  ) +  ylab( expression(Gene~exp~VCP:CTRL) ) +
+  scale_colour_gradient(low = "dodgerblue3", high = "firebrick2") +
+  geom_text_repel(data = labels_lenient, aes(x = IRratio.diff, y = log2FoldChange, label = gene_name), fontface = "italic", colour = "black", min.segment.length = 0, box.padding = 0.5, point.padding = 0.5, size = 2.5) +
+  theme(strip.background = element_rect(colour="black", fill="white"), panel.grid = element_blank(), legend.position = "none") + labs(colour = expression(log[10]~expression)) +
+  geom_hline(yintercept = 0, linetype = 3, colour = "darkgrey") + geom_vline(xintercept = 0, linetype = 3, colour = "darkgrey") + 
+  xlim(-0.36,0.36) +  ylim(-2,2.3) +
+  annotate(geom="text", x=.25, y=-2, label="IR up & expression down", color="darkgrey", size = 2.7)  + annotate(geom="text", x=.25, y=2, label="IR up & expression up", color="darkgrey", size = 2.7)  + 
+  annotate(geom="text", x=-.25, y=2, label="IR down & expression up", color="#E64B35FF", size = 2.7) +   annotate(geom="text", x=-.25, y=-2, label="IR down & expression down", color="darkgrey", size = 2.7)
+ac_who_dge_ir_scatter
+
+# 2C Scatter delta IR ratio vs DGE in C9ORF72
+labels_lenient <- filter(ac_bir_c9orf_vs_ctrl, p0.05_reliable == "significant") %>% filter(gene_name %in% astrocyte.reactivity.labels.ac_c9orf72) %>% arrange( -(abs(IRratio.diff)) ) %>% distinct(gene_name, .keep_all = TRUE)
+ac_bir_c9orf_scatter <- ggplot(filter(ac_bir_c9orf_vs_ctrl, p0.05_reliable == "significant"), aes( x = IRratio.diff, y = log2FoldChange,  label = gene_name, colour = log10(baseMean))) + 
+  geom_point(alpha = 0.5, size = 0.5) +  theme_bw() +  xlab( expression( Delta~IR~ratio~C9orf72-CTRL)  ) +  ylab( expression(Gene~exp~C9orf72:CTRL) ) +
+  scale_colour_gradient(low = "dodgerblue3", high = "firebrick2") +
+  geom_text_repel(data = labels_lenient, aes(x = IRratio.diff, y = log2FoldChange, label = gene_name), fontface = "italic", colour = "black", min.segment.length = 0, box.padding = 0.5, point.padding = 0.5, size = 2.5) +
+  theme(strip.background = element_rect(colour="black", fill="white"), panel.grid = element_blank(), legend.position = "none", legend.box.margin=margin(-10,-10,-10,-10), legend.spacing.x = unit(1.0, 'cm'), axis.text=element_text(size=10)) + labs(colour = expression(log[10]~expression)) +
+  geom_hline(yintercept = 0, linetype = 3, colour = "darkgrey") + geom_vline(xintercept = 0, linetype = 3, colour = "darkgrey") + 
+  xlim(-0.4,0.4) +  ylim(-2,2.3) +
+  annotate(geom="text", x=.25, y=-2, label="IR up & expression down", color="darkgrey", size = 2.7)  + annotate(geom="text", x=.25, y=2.2, label="IR up & expression up", color="darkgrey", size = 2.7)  + 
+  annotate(geom="text", x=-.25, y=2.2, label="IR down & expression up", color="#4DBBD5FF", size = 2.7) +   annotate(geom="text", x=-.25, y=-2, label="IR down & expression down", color="darkgrey", size = 2.7)
+ac_bir_c9orf_scatter
+
+# 2D Scatter delta IR ratio vs DGE in SOD1
+labels_lenient <- filter(ac_tyz_sod1_vs_ctrl, p0.05_reliable == "significant") %>% filter(gene_name %in% astrocyte.reactivity.labels.ac_sod1) %>% arrange( -(abs(IRratio.diff)) ) %>% distinct(gene_name, .keep_all = TRUE)
+ac_tzy_sod1_scatter <- ggplot(filter(ac_tyz_sod1_vs_ctrl, p0.05_reliable == "significant"), aes( x = IRratio.diff, y = log2FoldChange,  label = gene_name, colour = log10(baseMean))) + 
+  geom_point(alpha = 0.5, size = 0.5) +  theme_bw() +  xlab( expression( Delta~IR~ratio~SOD1-CTRL)  ) +  ylab( expression(Gene~exp~SOD1:CTRL) ) +
+  scale_colour_gradient(low = "dodgerblue3", high = "firebrick2") +
+  geom_text_repel(data = labels_lenient, aes(x = IRratio.diff, y = log2FoldChange, label = gene_name), fontface = "italic", colour = "black", min.segment.length = 0, box.padding = 0.5, point.padding = 0.5, size = 2.5) +
+  theme(strip.background = element_rect(colour="black", fill="white"), panel.grid = element_blank(), legend.position = "none", legend.box.margin=margin(-10,-10,-10,-10), legend.spacing.x = unit(1.0, 'cm'), axis.text=element_text(size=10)) + labs(colour = expression(log[10]~expression)) +
+  geom_hline(yintercept = 0, linetype = 3, colour = "darkgrey") + geom_vline(xintercept = 0, linetype = 3, colour = "darkgrey") + 
+  xlim(-0.5,0.5) +  ylim(-2,2.3) +
+  annotate(geom="text", x=.3, y=-2, label="IR up & expression down", color="darkgrey", size = 2.7)  + annotate(geom="text", x=.3, y=2.2, label="IR up & expression up", color="darkgrey", size = 2.7)  + 
+  annotate(geom="text", x=-.3, y=2.2, label="IR down & expression up", color="#00A087FF", size = 2.7) +   annotate(geom="text", x=-.3, y=-2, label="IR down & expression down", color="darkgrey", size = 2.7)
+ac_tzy_sod1_scatter
+
+# 2E Scatter delta IR ratio vs DGE in Reactive
+labels_lenient <- filter(ac_bar_a1_vs_a0, p0.05_reliable == "significant") %>% filter(gene_name %in% astrocyte.reactivity.labels.ac_a1) %>% arrange( -(abs(IRratio.diff)) ) %>% distinct(gene_name, .keep_all = TRUE)
+ac_bar_a1_scatter <- ggplot(filter(ac_bar_a1_vs_a0, p0.05_reliable == "significant"), aes( x = IRratio.diff, y = log2FoldChange,  label = gene_name, colour = log10(baseMean))) + 
+  geom_point(alpha = 0.5, size = 0.5) +  theme_bw() +  xlab( expression( Delta~IR~ratio~Reactive-CTRL)  ) +  ylab( expression(Gene~exp~Reactive:CTRL) ) +
+  scale_colour_gradient(low = "dodgerblue3", high = "firebrick2") +
+  geom_text_repel(data = labels_lenient, aes(x = IRratio.diff, y = log2FoldChange, label = gene_name), fontface = "italic", colour = "black", min.segment.length = 0, box.padding = 0.5, point.padding = 0.5, size = 2.5) +
+  theme(strip.background = element_rect(colour="black", fill="white"), panel.grid = element_blank(), legend.position = "none", legend.box.margin=margin(-10,-10,-10,-10),legend.spacing.x = unit(1.0, 'cm'), axis.text=element_text(size=10)) + labs(colour = expression(log[10]~expression)) +
+  geom_hline(yintercept = 0, linetype = 3, colour = "darkgrey") + geom_vline(xintercept = 0, linetype = 3, colour = "darkgrey") + 
+  xlim(-0.36,0.36) +  ylim(-2.5,6.0) +
+  annotate(geom="text", x=.2, y=-2, label="IR up & expression down", color="darkgrey", size = 2.7)  + annotate(geom="text", x=.2, y=5.7, label="IR up & expression up", color="darkgrey", size = 2.7)  + 
+  annotate(geom="text", x=-.2, y=5.7, label="IR down & expression up", color="#3C5488FF", size = 2.7) +   annotate(geom="text", x=-.2, y=-2, label="IR down & expression down", color="darkgrey", size = 2.7)
+ac_bar_a1_scatter
+
+
+# E 3 cats GO VCP IR & DGE
+dge_ir_genes <- ac_who_vcp_vs_ctrl %>% filter(p0.05_reliable == "significant") %>% split(.$direction) %>%  map("ensID") # create list of IR up/down & Expression up/down genes
+dge_ir_genes <- gost(dge_ir_genes) # run gprofiler2 on all groups - runs on all KEGG, GO, REAC,TF, WP pathways simultaneously
+dge_ir_gprofiles_filt <- dge_ir_genes$result %>% filter(str_detect(source, "KEGG|GO:BP|GO:MF|GO:CC|REAC|CORUM")) %>% arrange( -log10(p_value) ) %>% mutate( term_name = as.factor(term_name)) 
+dge_ir_gprofiles_filt$query <- gsub("expression", "GE", dge_ir_gprofiles_filt$query)
+dge_ir_gprofiles_curated_irdown_expdown <- dge_ir_gprofiles_filt %>% filter(query == "IR down & GE down" & (grepl("RNA", term_name) | grepl("nucle", term_name) | grepl("cyt", term_name)))
+paste('"',unique(dge_ir_gprofiles_curated_irdown_expdown$term_name),'",', sep = "", collapse = '\n') %>% cat()
+irdown_expdown_curated_list <- c("microtubule cytoskeleton",
+"ribonucleoprotein complex",
+"mRNA export from nucleus",
+"RNA transport",
+"RNA localization",
+"transcription by RNA polymerase II",
+"nucleocytoplasmic transport",
+"ribonucleoprotein granule",
+"nuclear speck",
+"Processing of Capped Intron-Containing Pre-mRNA",
+"RNA splicing",
+"mRNA processing",
+"mRNA metabolic process",
+# "cytoplasm",
+"RNA binding") #"nucleus")
+dge_ir_gprofiles_curated_irdown_expdown <- dge_ir_gprofiles_curated_irdown_expdown %>% filter(term_name %in% irdown_expdown_curated_list)
+dge_ir_gprofiles_curated_irup_expdown <- dge_ir_gprofiles_filt %>% filter(query == "IR up & GE down")
+paste('"',unique(dge_ir_gprofiles_curated_irup_expdown$term_name),'",', sep = "", collapse = '\n') %>% cat()
+irup_expdown_curated_list <- c("small GTPase binding",
+"microtubule cytoskeleton",
+"protein binding",
+"cell projection organization",
+"cellular component organization or biogenesis") #"plasma membrane bounded cell projection organization")
+dge_ir_gprofiles_curated_irup_expdown <- dge_ir_gprofiles_curated_irup_expdown %>% filter(term_name %in% irup_expdown_curated_list)
+dge_ir_gprofiles_curated_irup_expup <- dge_ir_gprofiles_filt %>% filter(query == "IR up & GE up")
+paste('"',unique(dge_ir_gprofiles_curated_irup_expup$term_name),'",', sep = "", collapse = '\n') %>% cat()
+irup_expup_curated_list <- c("enzyme activator activity",
+"transferase activity") #"plasma membrane bounded cell projection organization")
+dge_ir_gprofiles_curated_irup_expup <- dge_ir_gprofiles_curated_irup_expup %>% filter(term_name %in% irup_expup_curated_list)
+ac_who_vcp_vs_ctrl.go_curated_3cats <- curated_profiles_colours(gprofiles = bind_rows(dge_ir_gprofiles_curated_irdown_expdown, dge_ir_gprofiles_curated_irup_expdown, dge_ir_gprofiles_curated_irup_expup))  +
+  ggtitle("VCP")
+ac_who_vcp_vs_ctrl.go_curated_3cats
+
+# F 3 cats GO C9ORF
+bir_c9orf_dge_ir_genes <- filter(ac_bir_c9orf_vs_ctrl, p0.05_reliable == "significant") %>%  split(.$direction) %>%  map("ensID") # create list of IR up/down & Expression up/down genes
+bir_c9orf_dge_ir_genes <- gost(bir_c9orf_dge_ir_genes) # run gprofiler2 on all groups - runs on all KEGG, GO, REAC,TF, WP pathways simultaneously
+bir_c9orf_dge_ir_gprofiles_filt <- bir_c9orf_dge_ir_genes$result %>% filter(str_detect(source, "KEGG|GO:BP|GO:MF|GO:CC|REAC|CORUM")) %>% arrange( -log10(p_value) ) %>% mutate( term_name = as.factor(term_name)) 
+bir_c9orf_dge_ir_gprofiles_filt$query <- gsub("expression", "GE", bir_c9orf_dge_ir_gprofiles_filt$query)
+bir_c9orf_dge_ir_gprofiles_curated_irdown_expdown <- bir_c9orf_dge_ir_gprofiles_filt %>% filter(query == "IR down & GE down") 
+irdown_expdown_curated_list <- c("regulation of lipid biosynthetic process",
+"steroid metabolic process",
+"Activation of gene expression by SREBF (SREBP)",
+"cholesterol metabolic process")
+bir_c9orf_dge_ir_gprofiles_curated_irdown_expdown <- bir_c9orf_dge_ir_gprofiles_curated_irdown_expdown %>% filter(term_name %in% irdown_expdown_curated_list)
+bir_c9orf_dge_ir_gprofiles_curated_irdown_expdown$term_name <- gsub("Activation of gene expression by", "Activation by", bir_c9orf_dge_ir_gprofiles_curated_irdown_expdown$term_name)
+bir_c9orf_dge_ir_gprofiles_curated_irup_expup <- bir_c9orf_dge_ir_gprofiles_filt %>% filter(query == "IR up & GE up") 
+bir_c9orf_dge_ir_gprofiles_curated_irup_expdown <- bir_c9orf_dge_ir_gprofiles_filt %>% filter(query == "IR up & GE down") 
+irup_expdown_curated_list <- c("cellular response to DNA damage stimulus",
+"double-strand break repair",
+"helicase activity",
+"DNA conformation change")
+bir_c9orf_dge_ir_gprofiles_curated_irup_expdown <- bir_c9orf_dge_ir_gprofiles_curated_irup_expdown %>% filter(term_name %in% irup_expdown_curated_list)
+bir_c9orf_dge_ir_gprofiles_curated_irup_expdown$term_name <- gsub("cellular response to DNA damage stimulus", "response to DNA damage", bir_c9orf_dge_ir_gprofiles_curated_irup_expdown$term_name)
+C9orf72.go_curated_3cats <- curated_profiles_colours(gprofiles = bind_rows(bir_c9orf_dge_ir_gprofiles_curated_irup_expup, bir_c9orf_dge_ir_gprofiles_curated_irdown_expdown, bir_c9orf_dge_ir_gprofiles_curated_irup_expdown)) +
+  ggtitle("C9ORF72")
+C9orf72.go_curated_3cats
+
+# G 3 cats GO SOD1
+tyz_sod1_dge_ir_genes <- filter(ac_tyz_sod1_vs_ctrl,p0.05_reliable == "significant") %>%  split(.$direction) %>%  map("ensID") # create list of IR up/down & Expression up/down genes
+tyz_sod1_dge_ir_genes <- gost(tyz_sod1_dge_ir_genes) # run gprofiler2 on all groups - runs on all KEGG, GO, REAC,TF, WP pathways simultaneously
+tyz_sod1_dge_ir_gprofiles_filt <- tyz_sod1_dge_ir_genes$result %>% filter(str_detect(source, "KEGG|GO:BP|GO:MF|GO:CC|REAC|CORUM")) %>% arrange( -log10(p_value) ) %>% mutate( term_name = as.factor(term_name)) 
+tyz_sod1_dge_ir_gprofiles_filt$query <- gsub("expression", "GE", tyz_sod1_dge_ir_gprofiles_filt$query)
+tyz_sod1_dge_ir_gprofiles_filt$term_name <- gsub("endoplasmic reticulum to Golgi vesicle-mediated transport", "endoplasmic reticulum - golgi", tyz_sod1_dge_ir_gprofiles_filt$term_name)
+tyz_sod1_dge_ir_gprofiles_curated_irdown_expdown <- tyz_sod1_dge_ir_gprofiles_filt %>% filter(query == "IR down & GE down")
+tyz_sod1_dge_ir_gprofiles_curated_irup_expdown <- tyz_sod1_dge_ir_gprofiles_filt %>% filter(query == "IR up & GE down")
+tyz_sod1_dge_ir_gprofiles_curated_irup_expup <- tyz_sod1_dge_ir_gprofiles_filt %>% filter(query == "IR up & GE up")
+SOD1.go_curated_3cats <- curated_profiles_colours(gprofiles = bind_rows(tyz_sod1_dge_ir_gprofiles_curated_irdown_expdown, tyz_sod1_dge_ir_gprofiles_curated_irup_expdown, tyz_sod1_dge_ir_gprofiles_curated_irup_expup))  +
+  ggtitle("SOD1")
+SOD1.go_curated_3cats
+
+# Reactive GO 3 cats has no relevent terms - retinoic acid & citrate dehydrogenase
+```
+
+### Merge
+
+```{r}
+figS3.merged <- ggarrange(
+  ggarrange(ac_who_dge_ir_scatter, ac_bir_c9orf_scatter, ncol = 2, labels = c("A", "B")),
+  ggarrange(ac_tzy_sod1_scatter, ac_bar_a1_scatter, ncol = 2, labels = c("C", "D")),
+  ac_who_vcp_vs_ctrl.go_curated_3cats,
+  ggarrange(C9orf72.go_curated_3cats, SOD1.go_curated_3cats, ncol = 2, labels = c("F", "G")),
+  nrow = 4, heights = c(1.1, 1.1, 1.0, 0.7), labels = c("", "", "E", "", ""))
+figS3.merged
+ggsave(figS3.merged, filename = "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/irlib/figures/figS3.merged.png", height = 11.75, width = 8.25)
+```
+
+## Table S5
+
+Overlap IR and gene expression between datasets
+
+```{r}
+IRdown_DGEup_VCP <- ac_who_vcp_vs_ctrl %>% filter(p0.05_reliable == "significant" & direction == "IR down & expression up") %>% pull(gene_name) %>% unique
+IRdown_DGEup_SOD1 <- ac_tyz_sod1_vs_ctrl %>% filter(p0.05_reliable == "significant" & direction == "IR down & expression up") %>% pull(gene_name) %>% unique
+IRdown_DGEup_C9ORF72 <- ac_bir_c9orf_vs_ctrl %>% filter(p0.05_reliable == "significant" & direction == "IR down & expression up") %>% pull(gene_name) %>% unique
+IRdown_DGEup_ALS <- unique(c(IRdown_DGEup_VCP,IRdown_DGEup_SOD1, IRdown_DGEup_C9ORF72))
+IRdown_DGEup_A1 <- ac_bar_a1_vs_a0 %>% filter(p0.05_reliable == "significant" & direction == "IR down & expression up") %>% pull(gene_name) %>% unique
+DGEup_TRAP <- dge_res_ac_mou_sod1_vs_ctrl %>% filter(padj < 0.05) %>% pull(gene_name) %>% toupper %>% unique # 902 genes
+DGEup_TRAP <- unique(DGEup_TRAP[DGEup_TRAP %in% gtf$gene_name]) # 765 / 902 have a human gene ID
+
+IRdown_DGEup_SOD1_VCP <- IRdown_DGEup_SOD1[IRdown_DGEup_SOD1 %in% IRdown_DGEup_VCP]
+IRdown_DGEup_C9ORF72_VCP <- IRdown_DGEup_C9ORF72[IRdown_DGEup_C9ORF72 %in% IRdown_DGEup_VCP]
+IRdown_DGEup_SOD1_VCP_C9ORF72 <- IRdown_DGEup_SOD1_VCP[IRdown_DGEup_SOD1_VCP %in% IRdown_DGEup_C9ORF72]
+
+IRdown_DGEup_overlap <- cbindX(arrange(as_tibble_col(IRdown_DGEup_SOD1[IRdown_DGEup_SOD1 %in% IRdown_DGEup_VCP], column_name = "SOD1_VCP"), SOD1_VCP), 
+                         arrange(as_tibble_col(IRdown_DGEup_C9ORF72[IRdown_DGEup_C9ORF72 %in% IRdown_DGEup_VCP], column_name = "C9ORF72_VCP"), C9ORF72_VCP),  
+                         arrange(as_tibble_col(IRdown_DGEup_C9ORF72_VCP[IRdown_DGEup_C9ORF72_VCP %in% IRdown_DGEup_SOD1], column_name = "SOD1_C9ORF72_VCP"), SOD1_C9ORF72_VCP),  
+                         arrange(as_tibble_col(IRdown_DGEup_A1[IRdown_DGEup_A1 %in% IRdown_DGEup_ALS], column_name = "Reactive_any.ALS"), Reactive_any.ALS),  
+                         arrange(as_tibble_col(IRdown_DGEup_A1[IRdown_DGEup_A1 %in% IRdown_DGEup_SOD1_VCP_C9ORF72], column_name = "Reactive_all.ALS"), Reactive_all.ALS), 
+                         arrange(as_tibble_col(DGEup_TRAP[DGEup_TRAP %in% IRdown_DGEup_ALS], column_name = "SOD1G37R.TRAP_ALS"), SOD1G37R.TRAP_ALS), 
+                         arrange(as_tibble_col(DGEup_TRAP[DGEup_TRAP %in% IRdown_DGEup_A1], column_name = "SOD1G37R.TRAP_Reactive"), SOD1G37R.TRAP_Reactive))
+IRdown_DGEup_overlap[is.na(IRdown_DGEup_overlap)] <- ""
+write.csv(IRdown_DGEup_overlap, "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/irlib/results/IRdown_DGEup.overlap.csv")
+
+IRdown_A1_ALS[IRdown_A1_ALS %in% all.reactivity.go] # "HSPG2"   "PSMD11"  "NFKBIZ"  "DNAJC2"  "ERF"     "TINF2"   "OSMR"    "TNIK"    "ILK"     "NUP188"  "STIP1"   "TBK1"    "MCAM"    "ARHGEF2" "NT5C3A"  "FN1"     "POLR3C"
+```
+
+## Figure 3
+
+```{r}
+# Coverage plots for MCAM, RECK, UBN1, LOXL3, TGFB1I1, COL7A1
+txdb <- makeTxDbFromGFF("/camp/home/ziffo/home/genomes/ensembl/Homo_sapiens.GRCh38.99.chr_patch_hapl_scaff.gtf", format="gtf") # make txdb from GTF - turn on only when needed
+seqlevels(txdb, pruning.mode="coarse") <- c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "X", "Y") # removes all the other chromsome annotations
+ac_who_ctrl.bam <- "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/alignment/STAR/merged/ac_who_ctrl.bam"
+ac_who_vcp.bam <- "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/alignment/STAR/merged/ac_who_vcp.bam"
+track_viewer_tx(gene_test = "RECK", txt = ac_who_vcp_vs_ctrl, mut.bam = ac_who_vcp.bam, ctrl.bam = ac_who_ctrl.bam, xpad = 6000)
+track_viewer_tx(gene_test = "LOXL3", txt = ac_who_vcp_vs_ctrl, mut.bam = ac_who_vcp.bam, ctrl.bam = ac_who_ctrl.bam, xpad = 700)
+track_viewer_tx(gene_test = "UBN1", txt = ac_who_vcp_vs_ctrl, mut.bam = ac_who_vcp.bam, ctrl.bam = ac_who_ctrl.bam, xpad = 7000)
+track_viewer_tx(gene_test = "COL7A1", txt = ac_who_vcp_vs_ctrl, mut.bam = ac_who_vcp.bam, ctrl.bam = ac_who_ctrl.bam, xpad = 700)
+track_viewer_tx(gene_test = "TGFB1I1", txt = ac_who_vcp_vs_ctrl, mut.bam = ac_who_vcp.bam, ctrl.bam = ac_who_ctrl.bam, xpad = 1000)
+track_viewer_tx(gene_test = "MCAM", txt = ac_who_vcp_vs_ctrl, mut.bam = ac_who_vcp.bam, ctrl.bam = ac_who_ctrl.bam, xpad = 1000)
+
+# qPCR validation of IR events
+
+# SOD1 TRAP-Seq GO terms up & downregulated
+DGEevents.ensID <- dge_res_ac_mou_sod1_vs_ctrl %>% filter(padj < 0.05) %>% mutate(direction = case_when(log2FoldChange > 0 ~ "translation up", log2FoldChange < 0 ~ "translation down", TRUE ~ "no_change")) %>% split(.$direction) %>%  map("ensID")
+DGEevents.ensID$no_change <- NULL
+DGEevents.gprofiles <- gost(query = DGEevents.ensID, organism = "mmusculus") # run gprofiler2 on all groups - runs on all KEGG, GO, REAC,TF, WP pathways simultaneously
+DGEevents.gprofiles_filt <- DGEevents.gprofiles$result %>% filter(str_detect(source, "KEGG|GO:BP|GO:MF|GO:CC|REAC|CORUM")) %>% arrange( -log10(p_value) ) %>% mutate( term_name = as.factor(term_name)) 
+DGEevents.gprofiles_filt.up <- DGEevents.gprofiles_filt %>% filter(query == "translation up")
+expup_curated_list <- c("response to interferon-beta",
+"antigen processing and presentation",
+"gliogenesis",
+"cell adhesion",
+"tumor necrosis factor superfamily cytokine production",
+"interleukin-6 production",
+"response to interferon-gamma",
+# "macrophage activation",
+"collagen-containing extracellular matrix",
+"actin cytoskeleton organization",
+"anatomical structure morphogenesis",
+# "immune effector process",
+"positive regulation of cell motility",
+# "immune response",
+"cytokine production",
+# "apoptotic process",
+"response to cytokine",
+"inflammatory response",
+"immune system process",
+"response to stress")
+DGEevents.gprofiles_curated_expup <- DGEevents.gprofiles_filt %>% filter(query == "translation up")  %>% filter(term_name %in% expup_curated_list) %>% mutate(query = "")
+DGEevents.gprofiles_curated_expup$term_name <- gsub("tumor necrosis factor", "TNF", DGEevents.gprofiles_curated_expup$term_name)
+DGEevents.gprofiles_curated_expup$term_name <- gsub("collagen-containing extracellular matrix", "collagen extracellular matrix", DGEevents.gprofiles_curated_expup$term_name)
+TRAP.translationUP.go_curated <- curated_profiles(gprofiles = DGEevents.gprofiles_curated_expup, colours = "firebrick2") + labs(subtitle = "Translation Up")
+TRAP.translationUP.go_curated
+
+# TRAP-Seq SOD1 mouse downregulated genes
+DGEevents.gprofiles_filt.down <- DGEevents.gprofiles_filt %>% filter(query == "translation down")
+paste('"',unique(DGEevents.gprofiles_filt.down$term_name),'",', sep = "", collapse = '\n') %>% cat()
+expdown_curated_list <- c("cytoskeletal protein binding",
+"central nervous system development",
+"beta-catenin binding",
+"negative regulation of canonical Wnt signaling pathway",
+"negative regulation of cellular metabolic process",
+"negative regulation of gene expression",
+"negative regulation of transcription by RNA polymerase II",
+"cell morphogenesis",
+"RNA metabolic process",
+"nervous system development",
+"developmental process",
+"regulation of metabolic process",
+"RNA biosynthetic process",
+"regulation of cellular metabolic process",
+"regulation of RNA metabolic process",
+"DNA-binding transcription factor activity")
+DGEevents.gprofiles_curated_expdown <- DGEevents.gprofiles_filt %>% filter(query == "translation down") %>% filter(term_name %in% expdown_curated_list) %>% mutate(query = "")
+DGEevents.gprofiles_curated_expdown$term_name <- gsub("negative regulation of transcription by RNA polymerase II", "negative regulation of transcription by RNA pol2", DGEevents.gprofiles_curated_expdown$term_name)
+DGEevents.gprofiles_curated_expdown$term_name <- gsub("negative regulation of canonical Wnt signaling pathway", "negative regulation of canonical Wnt signaling", DGEevents.gprofiles_curated_expdown$term_name)
+DGEevents.gprofiles_curated_expdown$term_name <- gsub("negative regulation of cellular metabolic process", "negative regulation of metabolic process", DGEevents.gprofiles_curated_expdown$term_name)
+DGEevents.gprofiles_curated_expdown$term_name <- gsub("negative regulation", "downregulation", DGEevents.gprofiles_curated_expdown$term_name)
+TRAP.translationDOWN.go_curated <- curated_profiles(gprofiles = DGEevents.gprofiles_curated_expdown, colours = "dodgerblue3") + labs(subtitle = "Translation Down")
+TRAP.translationDOWN.go_curated
+
+# SOD1 TRAP Seq liddelow heatmap
+# Liddelow heatmap TRAP
+annot <- data.frame(row.names = astrocyte.reactivity.markers$gene_name, group = factor(astrocyte.reactivity.markers$group))
+annot_cols <- c("black", "firebrick2", "dodgerblue3")
+names(annot_cols) <- unique(astrocyte.reactivity.markers$group)
+annot_cols <- list(group = annot_cols)
+breaksList = seq(-1.5, 1.5, by = 0.1) # Set min (-3) and max (+3), and increasing steps (+0.1) for the color scale. Note: if some of your genes are outside of this range, they will appear white on the heatmap
+# plot LFC as a single row
+dge_res <- dge_res_ac_mou_sod1_vs_ctrl %>% mutate(gene_name = toupper(gene_name)) %>% filter(gene_name %in% astrocyte.reactive.genes) %>% dplyr::select(gene_name, "SOD1 G37R Translation" = log2FoldChange) %>%
+  arrange(factor(gene_name, levels = rownames(annot))) %>% drop_na # order the matrix by the annotation dataframe
+dge_res.mat <- make_matrix(select(dge_res,-gene_name),pull(dge_res,gene_name))
+dge_res.mat[dge_res.mat > 1.5] <- 1.5
+dge_res.mat[dge_res.mat < -1.5] <- -1.5
+dge_res.mat
+dge_res_padj <- dge_res_ac_mou_sod1_vs_ctrl %>% mutate(gene_name = toupper(gene_name)) %>% filter(gene_name %in% astrocyte.reactive.genes) %>% filter(log2FoldChange != "NA") %>% mutate(sig = case_when(padj <= 0.05 ~ "\u2217", TRUE ~ "")) %>% arrange(factor(gene_name, levels = rownames(annot))) %>% dplyr::select(sig) %>%  as.matrix  # order the matrix by the annotation dataframe
+ac_mou_sod1_liddelow_heatmap <- pheatmap(t(dge_res.mat), cluster_rows=F, show_rownames=T, show_colnames = T, cluster_cols=F, fontsize = 6, fontsize_row = 10, fontsize_col = 10,
+                  gaps_col = c(12,24), #gaps_row = 1,
+                  annotation_col = annot, annotation_names_col = F, annotation_legend = FALSE, annotation_colors = annot_cols, main = "", display_numbers = t(dge_res_padj), 
+                  color = colorRampPalette(rev(greenred(75)))(length(breaksList)),breaks = breaksList,
+                  cellheight = 20, cellwidth = 12, border_color=NA)
+```
+
+### Merge
+
+Add the coverage plots to top of figure on Illustrator
+
+```{r}
+fig3.merged <- ggarrange(
+  ggarrange(NULL, TRAP.translationUP.go_curated, TRAP.translationDOWN.go_curated, ncol = 3, widths = c(0.05,1,1)),
+  NULL,
+  annotate_figure(ac_mou_sod1_liddelow_heatmap[[4]],  bottom = text_grob("Pan-reactive                                   A1                                           A2", 
+                                                                         color = "black", hjust = 0.73, vjust = -11.3, x = 0.5, face = "italic", size = 10)),
+  nrow = 3, labels = c("C", "", "D"), heights = c(4,0.05,1))
+fig3.merged
+ggsave(fig3.merged, filename = "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/irlib/figures/fig3.merged.png", height = 6, width = 9)
+```
+
+## Figure S4
+
+```{r}
+# A RNAseq of fractionation
+ctrl <- dge_res_ac_ctrl_cyt_vs_nuc %>%  dplyr::select(ensID, log2FoldChange_ctrl = log2FoldChange, padj_ctrl = padj, gene_name)
+vcp <- dge_res_ac_vcp_cyt_vs_nuc %>% dplyr::select(ensID, log2FoldChange_vcp = log2FoldChange, padj_vcp = padj, gene_name)
+ctrl_vcp <- full_join(ctrl, vcp, by = c("gene_name", "ensID"))
+cor.test(x = ctrl_vcp$log2FoldChange_ctrl, y = ctrl_vcp$log2FoldChange_vcp)
+t.test( x = ctrl_vcp$log2FoldChange_ctrl, y = ctrl_vcp$log2FoldChange_vcp, paired = TRUE )
+fractionation_labels = c("MALAT1", "GAPDH", "NEAT", "MALAT1", "GFAP", "TUBB", "ASH2L", "PAF49", "CENPA", "CHOP", "EIF6", "ERS1", "H2AX", "H2AZ1", "H4F3", "H3F3B", "LSD1", "LMNA", "LMNC", "MYC", "NOP2", "NUP98", "SIR1", "SRSF2")
+fractionation_labels_filt = c("MLXIPL", "MALAT1", "GAPDH", "NEAT1", "GLUL", "ACTB", "ASS1", " SLC2A2", "APOE", "PCK1", "MALAT1", "GFAP", "TUBB", "PAF49", "CHOP", "ERS1", "H4F3", "LSD1", "HIST", "LMNC", "NOP2", "NUP98", "SIR1", "HIST4H4", "HIST1H2APS3", "HIST1H2APS5", "HIST2H2BD", "HIST2H2BF", "HIST2H2BK", "HIST2H2AK", "HIST1H2PS3") #NLRP6 GCGR
+cyt_vs_nuc_ctrl.vcp.scatter <- ggplot(ctrl_vcp, aes( x = log2FoldChange_ctrl, y = log2FoldChange_vcp,  label = gene_name)) + 
+  geom_point(colour = "#B768A2", alpha = 0.5, size = 0.5) +  theme_bw() +  xlab( expression( CTRL~RNAseq~log[2]~fold~change~Cyt:Nuc)  ) +  ylab( expression( VCP~RNAseq~LFC~Cyto:Nuc) ) +
+  geom_text_repel(data = filter(ctrl_vcp, gene_name %in%  fractionation_labels_filt), aes(x = log2FoldChange_ctrl, y = log2FoldChange_vcp, label = gene_name), fontface = "italic", colour = "black", min.segment.length = 0, box.padding = 0.5, point.padding = 0.5, size = 3) +
+  theme(strip.background = element_rect(colour="black", fill="white"), panel.grid = element_blank()) +
+  geom_hline(yintercept = 0, linetype = 3, colour = "darkgrey") + geom_vline(xintercept = 0, linetype = 3, colour = "darkgrey") + 
+  geom_smooth(data = ctrl_vcp, aes(x = log2FoldChange_ctrl, y = log2FoldChange_vcp), method = "lm", se = FALSE, show.legend = TRUE, colour = "black") + geom_abline(slope = 1, intercept = 0, linetype = 2) +
+  annotate(geom="text", x=-4.5, y=8, label=expression("p < 2.2e-16; R = 0.69"), color="black", size = 2.8)  +  xlim(-8,8) + ylim(-8,8) +
+  annotate(geom="text", x=4.5, y=-8, label="nuclear in VCP but not CTRL", color="darkgrey", size = 2.8)  + annotate(geom="text", x=4.5, y=8, label="cytoplasmic in both VCP & CTRL", color="dodgerblue3", size = 2.8)  + 
+  annotate(geom="text", x=-4.5, y=6, label="nuclear in CTRL but not VCP", color="darkgrey", size = 2.8) +   annotate(geom="text", x=-4.5, y=-8, label="nuclear in both VCP & CTRL", color="firebrick2", size = 2.8)
+cyt_vs_nuc_ctrl.vcp.scatter
+
+# B Mass spec fractionation
+ctrl <- ctrl_mass_spec_results %>% dplyr::select(name, ID, ctrl.lfc = cyt_vs_nuc_ratio) %>% mutate(condition = "ctrl")
+vcp <- vcp_mass_spec_results %>% dplyr::select(name, ID, vcp.lfc = cyt_vs_nuc_ratio) %>% mutate(condition = "vcp")
+ctrl_vcp <- full_join(ctrl, vcp, by = c("name", "ID"))
+cor.test(x = ctrl_vcp$ctrl.lfc, y = ctrl_vcp$vcp.lfc)
+t.test( x = ctrl_vcp$ctrl.lfc, y = ctrl_vcp$vcp.lfc, paired = TRUE )
+bahar_halpern = c("LMNA", "GFAP", "GAPDH", "TUBB", "GCGR", "MALAT1", "GCK", "NEAT1", "MLXIPL", "INS2", "ALDOA", "INS1", "GLUL", "MLRP6", "APOE", "ASS1", "SLC2A2", "KRT19", "NOS2",
+                  "HIST1H2BK", "HIST1H2BM", "HIST1H4A", "HIST2H2AA3", "HIST2H3A", "HIST1H2AC", "HIST1H1E", "HIST1H1C", 
+                  "PAF49", "CENPA", "CHOP", "EIF6", "HIF1A", "LSD1", "MYC", "NOP2", "NUP98", "SIRT1")
+# "VIM", "COL1A1", "DDX5", "FN1", "FLNA", "HNRNPK", "FUS", "HNRNPL", "SFPQ", "HNRNPH1", "OSMR", "NONO", "HLA-A", "HLA-B", "HLA-C", "STAT3", "ANXA2", "SPARC", "HNRNPU", "HNRNPA2B1", "B2M", "PPIA", "LRP1","SRRM2", "SRSF5", "TNC", "SLC44A2", "CXCL2", "NFKBIZ", "RTRAF", "NUP210", "GAPDH", "NEAT", "MALAT1", "HIST*", "GFAP", "TUBB")
+labels_lenient <- ctrl_vcp %>% filter(name %in% bahar_halpern) %>% arrange( -(abs(ctrl.lfc)) ) %>% distinct(name, .keep_all = TRUE)
+mass.spec_cyt_vs_nuc.scatter <- ggplot(ctrl_vcp, aes( x = ctrl.lfc, y = vcp.lfc,  label = name)) + 
+  geom_point(colour = "#B768A2", alpha = 0.5, size = 0.5) +  theme_bw() +  xlab( expression( CTRL~protein~log[2]~fold~change~Cyt:Nuc)  ) +  ylab( expression( VCP~protein~LFC~Cyt:Nuc) ) +
+  geom_text_repel(data = labels_lenient, aes(x = ctrl.lfc, y = vcp.lfc, label = name), fontface = "italic", colour = "black", min.segment.length = 0, box.padding = 0.5, point.padding = 0.5, size = 3) +
+  theme(strip.background = element_rect(colour="black", fill="white"), panel.grid = element_blank()) +
+  geom_hline(yintercept = 0, linetype = 3, colour = "darkgrey") + geom_vline(xintercept = 0, linetype = 3, colour = "darkgrey") + 
+  geom_smooth(data = ctrl_vcp, aes(x = ctrl.lfc, y = vcp.lfc), method = "lm", se = FALSE, show.legend = TRUE, colour = "black") + geom_abline(slope = 1, intercept = 0, linetype = 2) +
+  annotate(geom="text", x=-5, y=10, label=expression(beta*"=1.01; P < 2.2e-16; R = 0.89"), color="black", size = 2.8)  +  #xlim(-4,4) + ylim(-2,2) +
+  annotate(geom="text", x=5, y=-12, label="nuclear in VCP but not CTRL", color="darkgrey", size = 2.8)  + annotate(geom="text", x=5, y=10, label="cytoplasmic in both VCP & CTRL", color="dodgerblue3", size = 2.8)  + 
+  annotate(geom="text", x=-5, y=9, label="nuclear in CTRL but not VCP", color="darkgrey", size = 2.8) +   annotate(geom="text", x=-5, y=-12, label="nuclear in both VCP & CTRL", color="firebrick2", size = 2.8)
+mass.spec_cyt_vs_nuc.scatter
+
+# C Nuc IR & Cyto DGE scatter
+labels_lenient <- filter(nuc_ir_cyt_dge, p0.05_reliable == "significant") %>% filter(gene_name %in% astrocyte.reactivity.labels.ac_nucIR_cytDGE) %>% arrange( -(abs(IRratio.diff)) ) %>% distinct(gene_name, .keep_all = TRUE)
+nucIR_cytDGE_scatter <- ggplot(filter(nuc_ir_cyt_dge, p0.05_reliable == "significant"), aes( x = IRratio.diff, y = log2FoldChange,  label = gene_name, colour = log10(baseMean))) + 
+  geom_point(alpha = 0.5, size = 0.5) +  theme_bw() +  xlab( expression( Nuclear~Delta~IR~ratio~VCP-CTRL)  ) +  ylab( expression( Cytoplasm~DGE~log[2]~FC~VCP:CTRL) ) +
+  scale_colour_gradient(low = "dodgerblue3", high = "firebrick2") +
+  geom_text_repel(data = labels_lenient, aes(x = IRratio.diff, y = log2FoldChange, label = gene_name), fontface = "italic", colour = "black", min.segment.length = 0, box.padding = 0.5, point.padding = 0.5, size=3) +
+  theme(strip.background = element_rect(colour="black", fill="white"), panel.grid = element_blank(), legend.position = "none") +
+  geom_hline(yintercept = 0, linetype = 3, colour = "darkgrey") + geom_vline(xintercept = 0, linetype = 3, colour = "darkgrey") + 
+  xlim(-0.36,0.36) +  ylim(-2,2.3) +
+  annotate(geom="text", x=.2, y=-2, label="IR up & expression down", color="darkgrey", size = 2.9)  + annotate(geom="text", x=.2, y=2.2, label="IR up & expression up", color="darkgrey", size = 2.9)  + 
+  annotate(geom="text", x=-.2, y=2.2, label="IR down & expression up", color="firebrick2", size = 2.9) +   annotate(geom="text", x=-.2, y=-2, label="IR down & expression down", color="darkgrey", size = 2.9)
+nucIR_cytDGE_scatter
+
+# PCA fractionation
+vsd_ac_nuc_cyt_vcp_vs_ctrl <- readRDS("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/vsd_ac_nuc_cyt_vcp_vs_ctrl.RDS")
+colnames(vsd_ac_nuc_cyt_vcp_vs_ctrl) <- colData(vsd_ac_nuc_cyt_vcp_vs_ctrl)$patient_fraction
+pcaData_astrocyte <- plotPCA(vsd_ac_nuc_cyt_vcp_vs_ctrl, intgroup=c("sample", "condition", "mutation", "cellline","fraction", "patient_fraction", "patient"), returnData=TRUE)
+percentVar_astrocyte <- round(100 * attr(pcaData_astrocyte, "percentVar"))
+ac_fractions_pca <- ggplot(pcaData_astrocyte, aes(PC1, PC2, color=mutation, shape = fraction)) + geom_text_repel(aes(label=patient), size = 4) + 
+  scale_shape_manual(values=c(15, 17)) + scale_colour_manual( values = c("dodgerblue", "firebrick2") ) +  theme_bw() +  
+  theme(panel.grid = element_blank(), legend.title = element_blank(), legend.text=element_text(size=12), legend.position = "right", legend.spacing = unit(0.2, 'cm')) + geom_point(size=3) + 
+  xlab(paste0("PC1: ",percentVar_astrocyte[1],"% variance")) +  ylab(paste0("PC2: ",percentVar_astrocyte[2],"% variance")) + coord_fixed()
+ac_fractions_pca
+
+# C. Dendrogram
+sampleDists <- dist(t(assay(vsd_ac_nuc_cyt_vcp_vs_ctrl)))
+hc <- hclust(sampleDists, method = "ward.D2")
+a <- c("dodgerblue", "dodgerblue", "firebrick2","firebrick2", "dodgerblue", "dodgerblue", "firebrick2","firebrick2")
+ac_fractions_dendrogram <- ggdendrogram(hc, rotate = TRUE, theme_dendro = FALSE) +  theme_classic()  + 
+  theme(axis.line=element_blank(), axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text.x=element_blank(), axis.ticks=element_blank(), axis.text.y= element_text(size = 12, colour = a), strip.background = element_rect(colour="black", fill="white"), panel.grid = element_blank()) 
+ac_fractions_dendrogram
+```
+
+### Merge
+
+```{r}
+figS4.merged <- ggarrange(
+  ggarrange(cyt_vs_nuc_ctrl.vcp.scatter, mass.spec_cyt_vs_nuc.scatter, ncol = 2, labels = c("A", "B")),
+  ggarrange(ac_fractions_pca, ac_fractions_dendrogram, ncol = 2, widths = c(2,1), labels = c("C", "D")),
+  nucIR_cytDGE_scatter,
+  nrow = 3, heights = c(1, 1.0, 1.2), labels = c("", "", "E"))
+figS4.merged
+ggsave(figS4.merged, filename = "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/irlib/figures/figS4.merged.png", height = 11.75, width = 8.25)
+```
+
+## Figure S5
+
+
+```{r}
+# Reliability histogram Nuclear
+ac_nuc.reliability_histogram <- histogram_plot_irfinder(ctrl = ac_nuc_ctrl.IR, mutant = ac_nuc_vcp.IR, control = "Nuclear CTRL", condition = "Nuclear VCP")
+ac_nuc.reliability_histogram
+
+# Reliability histogram Cytoplasmic
+ac_cyt.reliability_histogram <- histogram_plot_irfinder(ctrl = ac_cyt_ctrl.IR, mutant = ac_cyt_vcp.IR, control = "Cytoplasmic CTRL", condition = "Cytoplasmic VCP")
+ac_cyt.reliability_histogram
+
+# Venn overlap whole, nuclear, cyto
+ctrl.filt <- ac_who_ctrl.IR %>% dplyr::select(Chr, Start, End, Name, Strand, gene_name, "reliable_ctrl" = reliable_retained)
+mutant.filt <- ac_who_vcp.IR %>% dplyr::select(Chr, Start, End, Name, Strand, gene_name, "reliable_vcp" = reliable_retained)
+ctrl_and_mutant.filt.who <- ctrl.filt %>% full_join(mutant.filt, by = c("Chr", "Start", "End", "Name", "Strand", "gene_name")) %>% 
+  mutate(IR_who = case_when(reliable_ctrl == "reliable-retained" ~ "reliable-retained", reliable_vcp == "reliable-retained" ~ "reliable-retained", TRUE ~ "unreliable-spliced")) %>% 
+  dplyr::select(-reliable_ctrl, -reliable_vcp)
+ctrl.filt <- ac_nuc_ctrl.IR %>% dplyr::select(Chr, Start, End, Name, Strand, gene_name, "reliable_ctrl" = reliable_retained)
+mutant.filt <- ac_nuc_vcp.IR %>% dplyr::select(Chr, Start, End, Name, Strand, gene_name,"reliable_vcp" = reliable_retained)
+ctrl_and_mutant.filt.nuc <- ctrl.filt %>% full_join(mutant.filt, by = c("Chr", "Start", "End", "Name", "Strand", "gene_name"))  %>% 
+  mutate(IR_nuc = case_when(reliable_ctrl == "reliable-retained" ~ "reliable-retained", reliable_vcp == "reliable-retained" ~ "reliable-retained", TRUE ~ "unreliable-spliced")) %>% 
+  dplyr::select(-reliable_ctrl, -reliable_vcp)
+ctrl.filt <- ac_cyt_ctrl.IR %>% dplyr::select(Chr, Start, End, Name, Strand, gene_name, "reliable_ctrl" = reliable_retained)
+mutant.filt <- ac_cyt_vcp.IR %>% dplyr::select(Chr, Start, End, Name, Strand, gene_name, "reliable_vcp" = reliable_retained)
+ctrl_and_mutant.filt.cyt <- ctrl.filt %>% full_join(mutant.filt, by = c("Chr", "Start", "End", "Name", "Strand", "gene_name"))  %>% 
+  mutate(IR_cyt = case_when(reliable_ctrl == "reliable-retained" ~ "reliable-retained", reliable_vcp == "reliable-retained" ~ "reliable-retained", TRUE ~ "unreliable-spliced")) %>% 
+  dplyr::select(-reliable_ctrl, -reliable_vcp)
+who_nuc_IRoverlap <- ctrl_and_mutant.filt.who %>% full_join(ctrl_and_mutant.filt.nuc, c("Chr", "Start", "End", "Name", "Strand", "gene_name"))
+who_nuc_cyt_IRoverlap <- who_nuc_IRoverlap %>% full_join(ctrl_and_mutant.filt.cyt, c("Chr", "Start", "End", "Name", "Strand", "gene_name"))
+who_nuc_cyt_IRoverlap <- who_nuc_cyt_IRoverlap %>% mutate(overlap = case_when(IR_who == "reliable-retained" & IR_nuc == "reliable-retained" & IR_cyt == "reliable-retained" ~ "overlapping",
+                                                                              IR_who == "reliable-retained" & IR_nuc == "reliable-retained" & IR_cyt != "reliable-retained" ~ "whole & nuclear",
+                                                                              IR_who == "reliable-retained" & IR_nuc != "reliable-retained" & IR_cyt == "reliable-retained" ~ "whole & cytoplasmic",
+                                                                              IR_who != "reliable-retained" & IR_nuc != "reliable-retained" & IR_cyt == "reliable-retained" ~ "cytoplasmic specific",
+                                                                              IR_who != "reliable-retained" & IR_nuc == "reliable-retained" & IR_cyt != "reliable-retained" ~ "nuclear specific",
+                                                                              IR_who == "reliable-retained" & IR_nuc != "reliable-retained" & IR_cyt != "reliable-retained" ~ "whole specific",
+                                                                              TRUE ~ "none"))
+who_nuc_cyt_IRoverlap.filt <- filter(who_nuc_cyt_IRoverlap, overlap != "none")
+venn_who_nuc_cyt <- as.ggplot(
+  ~draw.triple.venn(
+    area1 = nrow( filter(who_nuc_cyt_IRoverlap.filt, overlap %in% c("whole specific", "whole & nuclear", "whole & cytoplasmic", "overlapping" ) ) ), # whole events
+    area2 = nrow( filter(who_nuc_cyt_IRoverlap.filt, overlap %in% c("nuclear specific", "whole & nuclear", "cytoplasmic & nuclear", "overlapping" ) ) ), # nuclear events
+    area3 = nrow( filter(who_nuc_cyt_IRoverlap.filt, overlap %in% c("cytoplasmic specific", "cytoplasmic & nuclear", "whole & cytoplasmic", "overlapping" ) ) ), # cytoplasmic events
+    n12 = nrow( filter(who_nuc_cyt_IRoverlap.filt, overlap %in% c("whole & nuclear", "overlapping" ) ) ), # whole & nuclear
+    n23 = nrow( filter(who_nuc_cyt_IRoverlap.filt, overlap %in% c("cytoplasmic & nuclear", "overlapping" ) ) ), # nuclear & cytoplasmic
+    n13 = nrow( filter(who_nuc_cyt_IRoverlap.filt, overlap %in% c("whole & cytoplasmic", "overlapping" ) ) ), # whole & nuclear
+    n123 = nrow(filter(who_nuc_cyt_IRoverlap.filt, overlap == "overlapping")),
+    category = c("whole", "nuclear", "cyto"), fill = c("#BC3C29", "#38618B", "#5A7A7C"), cat.dist = 0.05, cat.col = c("#BC3C29", "#38618B", "#5A7A7C"),
+    alpha = 0.5,  # cat.cex = c(1,1,1),
+    cat.fontfamily = "sans"))#, cat.pos = 360)) # cat.dist = c(0.1,0.1,0.1))) + labs(title = "Whole, nuclear & cytoplasmic overlap for CTRL vs VCP") + theme(plot.title = element_text(hjust = 0.5)) #+ plot_annotation(caption = "red: whole cell, green: cytoplasmic, blue: nuclear")
+venn_who_nuc_cyt
+
+# MA plot cyto
+cyt_ma <- ma_plot_irfinder(data = ac_cyt_vcp_vs_ctrl, labels_list = astrocyte.reactivity.labels.ac_cyt) + ylab(expression( Cytoplasm~Delta~IR~VCP:CTRL )) + xlim(0.6,5.2) + ylim(-0.4,0.4) +
+  geom_segment(aes(x = 5, xend = 5, y= 0.1, yend= 0.39), arrow=arrow(length=unit(0.4,"cm")), color = "dodgerblue") +
+  geom_segment(aes(x = 5, xend = 5, y= -0.1, yend= -0.39),arrow=arrow(length=unit(0.4,"cm")), color = "firebrick2") +
+  annotate("text", x = 4.5, y = 0.3, label = "VCP Up", colour = "dodgerblue") +   annotate("text", x = 4.5, y = -0.3, label = "VCP Down", colour = "firebrick2")
+cyt_ma
+
+# GO 3 cats nuc IR & cyto DGE
+dge_ir_genes <- filter(nuc_ir_cyt_dge, p0.05_reliable == "significant") %>%  split(.$direction) %>%  map("ensID") # create list of IR up/down & Expression up/down genes
+dge_ir_genes <- gost(dge_ir_genes) # run gprofiler2 on all groups - runs on all KEGG, GO, REAC,TF, WP pathways simultaneously
+dge_ir_gprofiles_filt <- dge_ir_genes$result %>% filter(str_detect(source, "KEGG|GO:BP|GO:MF|GO:CC|REAC|CORUM")) %>% arrange( -log10(p_value) ) %>% mutate( term_name = as.factor(term_name)) 
+dge_ir_gprofiles_filt$query <- gsub("expression", "GE", dge_ir_gprofiles_filt$query)
+irup_expdown_curated_list <- c("intracellular transport",                                                            
+ "Rho GTPase binding",                                                  
+ "dendrite cytoplasm",                                           
+ # "cytoplasmic microtubule",                                           
+ "mitotic cell cycle",                                                  
+ # "Metabolism of lipids",                                       
+ # "tubulin binding",                                                   
+ "axonogenesis",                                                     
+ "ribonucleotide binding",                                      
+ "GTPase binding",                                               
+"neuron development",                                                         
+# "protein binding",                                                 
+"cytoskeleton",                                                                                                         
+"cellular component organization",                                     
+"cytoplasm") 
+irdown_expdown_curated_list <- c("RNA export from nucleus",
+"RNA transport",
+"RNA localization",
+"transcription by RNA polymerase II",
+"nucleocytoplasmic transport",
+# "ribonucleoprotein granule",
+"nuclear speck",
+"Processing of Capped Intron-Containing Pre-mRNA",
+"RNA splicing", "RNA binding", "RNA processing",
+"cytoplasm", "RNA binding",
+"nucleus", "Nonsense-Mediated Decay (NMD)")
+dge_ir_gprofiles_curated_irdown_expdown <- dge_ir_gprofiles_filt %>% filter(query == "IR down & GE down", term_name %in% irdown_expdown_curated_list)
+dge_ir_gprofiles_curated_irup_expdown <- dge_ir_gprofiles_filt %>% filter(query == "IR up & GE down", term_name %in% irup_expdown_curated_list)
+dge_ir_gprofiles_curated_irup_expup <- dge_ir_gprofiles_filt %>% filter(query == "IR up & GE up")
+nucIR_cytGE.go_curated_3cats <- curated_profiles_colours(gprofiles = bind_rows(dge_ir_gprofiles_curated_irdown_expdown, dge_ir_gprofiles_curated_irup_expdown, dge_ir_gprofiles_curated_irup_expup)) 
+nucIR_cytGE.go_curated_3cats
+```
+
+
+### Merge
+
+```{r}
+figS5.merged <- ggarrange(
+  ac_nuc.reliability_histogram,
+  ac_cyt.reliability_histogram,
+  ggarrange(venn_who_nuc_cyt,  cyt_ma, ncol = 2, labels = c("C", "D"), widths = c(0.9,1.1)),
+  nucIR_cytGE.go_curated_3cats,
+  nrow = 4, labels = c("A", "B", "", "E"), heights = c(1,1,1.7,2.1))
+figS5.merged
+ggsave(figS5.merged, filename = "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/irlib/figures/figS5.merged.png", height = 11.75, width = 8.25)
+```
+
+## Figure 4
+
+Fractionation. Add schematic & western blot to top of figure in Illustrator.
+
+```{r}
+# qPCR
+qpcr_ct <- readxl::read_xlsx("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/sample-details/fractionation_qc_qpcr_raw_data_hamish.xlsx", sheet = "CT_values")
+qpcr_ct.df <- qpcr_ct %>% dplyr::select("GAPDH Exon", "GAPDH Intron", "Malat1", "NEAT", "ref_gene") %>% as.data.frame()
+group_var <- qpcr_ct %>% pull(fraction)
+qpcr_ct.fractions <- qpcr_ct %>% filter(fraction != "Whole")
+qpcr_ct.df <- qpcr_ct.fractions %>% dplyr::select("GAPDH Exon","ref_gene") %>% as.data.frame()
+group_var <- qpcr_ct.fractions %>% pull(mutation_fraction)
+# nuclear reference for cytoplasmic markers
+res_cytoplasmic_markers <- pcr_analyze(qpcr_ct.df,
+                   group_var = group_var,
+                   reference_gene = "ref_gene", # control gene
+                   reference_group = "ctrl_nuclear")# ,plot = TRUE) # control group
+# cytoplasmic reference for nuclear markers
+qpcr_ct.fractions <- qpcr_ct %>% filter(fraction != "Whole")
+qpcr_ct.df <- qpcr_ct.fractions %>% dplyr::select("GAPDH Intron","Malat1", "NEAT","ref_gene") %>% as.data.frame()
+group_var <- qpcr_ct.fractions %>% pull(mutation_fraction)
+res_nuclear_markers <- pcr_analyze(qpcr_ct.df,
+                   group_var = group_var,
+                   reference_gene = "ref_gene", # control gene
+                   reference_group = "ctrl_cytoplasm")#,plot = TRUE) # control group
+GAPDH_Exon <- filter(res_cytoplasmic_markers, gene == "GAPDH Exon") %>% mutate(mutation = str_split_fixed(group, "_", 2)[,1], fraction = str_split_fixed(group, "_", 2)[,2]) 
+GAPDH_Exon$fraction <- gsub("cytoplasm", "cyto", GAPDH_Exon$fraction)
+GAPDH_Exon_test <- GAPDH_Exon %>% dplyr::select(relative_expression, fraction) %>% t_test(relative_expression ~ fraction, var.equal = TRUE) %>% add_significance() %>% mutate(y.position = 4.2)
+GAPDH_Exon_plot <- ggplot(data=GAPDH_Exon, aes(x=fraction, y=relative_expression, fill=fraction)) + geom_bar(stat="identity", width=0.8, color = "black", position=position_dodge()) + 
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position=position_dodge(.9)) + theme_classic() + theme(legend.position="none", axis.text=element_text(size=8)) +
+  facet_grid(. ~ mutation) + scale_fill_manual(values=c("white", "black")) +  xlab("") + ylab( expression(GAPDH~Exon)  )
+GAPDH_Intron <- filter(res_nuclear_markers, gene == "GAPDH Intron") %>% mutate(mutation = str_split_fixed(group, "_", 2)[,1],fraction = str_split_fixed(group, "_", 2)[,2]) 
+GAPDH_Intron$fraction <- gsub("cytoplasm", "cyto", GAPDH_Intron$fraction)
+GAPDH_Intron_test <- GAPDH_Intron %>% dplyr::select(relative_expression, fraction) %>% t_test(relative_expression ~ fraction, var.equal = TRUE) %>% add_significance() %>% mutate(y.position = 4.2)
+GAPDH_Intron_plot <- ggplot(data=GAPDH_Intron, aes(x=fraction, y=relative_expression, fill=fraction)) + geom_bar(stat="identity", width=0.8, color = "black", position=position_dodge()) + 
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position=position_dodge(.9)) + theme_classic() + theme(legend.position="none", axis.text=element_text(size=8)) +
+  facet_grid(. ~ mutation) +
+  scale_fill_manual(values=c("white", "black")) +  xlab("") + ylab( expression(GAPDH~Intron))  #+ stat_pvalue_manual(GAPDH_Intron_test, label = "p.signif", tip.length = 0.01)
+Malat1 <- filter(res_nuclear_markers, gene == "Malat1") %>% mutate(mutation = str_split_fixed(group, "_", 2)[,1],fraction = str_split_fixed(group, "_", 2)[,2]) 
+Malat1$fraction <- gsub("cytoplasm", "cyto", Malat1$fraction)
+Malat1_test <- Malat1 %>% dplyr::select(relative_expression, fraction) %>% t_test(relative_expression ~ fraction, var.equal = TRUE) %>% add_significance() %>% mutate(y.position = 4.2)
+Malat1_plot <- ggplot(data=Malat1, aes(x=fraction, y=relative_expression, fill=fraction)) + geom_bar(stat="identity", width=0.8, color = "black", position=position_dodge()) + 
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position=position_dodge(.9)) + theme_classic() + theme(legend.position="none", axis.text=element_text(size=8)) +
+  facet_grid(. ~ mutation) +
+  scale_fill_manual(values=c("white", "black")) +  xlab("") + ylab( expression(Malat1)) #+ stat_pvalue_manual(Malat1_test, label = "p.signif", tip.length = 0.01)
+NEAT <- filter(res_nuclear_markers, gene == "NEAT") %>% mutate(mutation = str_split_fixed(group, "_", 2)[,1],fraction = str_split_fixed(group, "_", 2)[,2]) 
+NEAT$fraction <- gsub("cytoplasm", "cyto", NEAT$fraction)
+NEAT_test <- NEAT %>% dplyr::select(relative_expression, fraction) %>% t_test(relative_expression ~ fraction, var.equal = TRUE) %>% add_significance() %>% mutate(y.position = 4.2)
+NEAT_plot <- ggplot(data=NEAT, aes(x=fraction, y=relative_expression, fill=fraction)) + geom_bar(stat="identity", width=0.8, color = "black", position=position_dodge()) + 
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position=position_dodge(.9)) + theme_classic() + theme(legend.position="none", axis.text=element_text(size=8)) +
+  facet_grid(. ~ mutation) +
+  scale_fill_manual(values=c("white", "black")) +  xlab("") + ylab( expression(NEAT)) #+ stat_pvalue_manual(NEAT_test, label = "p.signif", tip.length = 0.01)
+
+# MA plot nucleus
+nuc_ma <- ma_plot_irfinder(data = ac_nuc_vcp_vs_ctrl, labels_list = astrocyte.reactivity.labels.ac_nuc) + ylab(expression( Nuclear~Delta~IR~ratio~VCP:CTRL )) + xlim(0.6,5.2) + ylim(-0.4,0.4) +
+  geom_segment(aes(x = 5.0, xend = 5.0, y= 0.1, yend= 0.39), arrow=arrow(length=unit(0.4,"cm")), color = "dodgerblue") +
+  geom_segment(aes(x = 5.0, xend = 5.0, y= -0.1, yend= -0.39),arrow=arrow(length=unit(0.4,"cm")), color = "firebrick2") +
+  annotate("text", x = 4.5, y = 0.3, label = "IR Up", colour = "dodgerblue") +   annotate("text", x = 4.4, y = -0.3, label = "IR Down", colour = "firebrick2")
+nuc_ma
+
+# VCP vs CTRL nuc & cyto sina
+nuclear <- ac_nuc_vcp_vs_ctrl %>% dplyr::filter(p0.05_reliable == "significant") %>% dplyr::select(Intron.GeneName.GeneID, Chr, Start, End, gene_name, ensID, p.diff, IRratio.diff, IRratio.diff, p0.05_reliable) %>% mutate(fraction = "nuclear")
+cytoplasmic <- ac_cyt_vcp_vs_ctrl %>% dplyr::filter(p0.05_reliable == "significant") %>% dplyr::select(Intron.GeneName.GeneID, Chr, Start, End, gene_name, ensID, p.diff, IRratio.diff, IRratio.diff, p0.05_reliable) %>% mutate(fraction = "cytoplasmic")
+nuc_cyt <- bind_rows(nuclear, cytoplasmic)
+
+# Sina violin plot: one sample stats nuc & cyto IR ratio LFC VCP vs CTRL
+nuc_cyt_sina_plot <- sinaplot.one.sample(data =  filter(nuc_cyt, p0.05_reliable == "significant"), groups = "fraction", continuous = "IRratio.diff", labels = "gene_name", colours = 2,  label_number = 0, stat.y.position = 0.3, width = 0.1, flip = "no", stats.test = "wilcoxon") + ylab(label = expression( Delta~IR~ratio~VCP-CTRL )) + xlab("") + ylim(c(-0.3,0.3)) +
+  geom_segment(aes(x = 2.5, xend = 2.5, y= 0.05, yend= 0.25), arrow=arrow(length=unit(0.4,"cm")), color = "dodgerblue") +
+  geom_segment(aes(x = 2.5, xend = 2.5, y= -0.05, yend= -0.25),arrow=arrow(length=unit(0.4,"cm")), color = "firebrick2") +
+  annotate("text", x = 2.3, y = 0.27, label = "IR Up", colour = "dodgerblue", size = 3) +   annotate("text", x = 2.3, y = -0.27, label = "IR Down", colour = "firebrick2", size = 3)
+nuc_cyt_sina_plot
+
+# Cyto vs Nuc VCP & CTRL sina
+ctrl <- ac_ctrl_cyt_vs_nuc %>% dplyr::filter(p0.05_reliable == "significant") %>% dplyr::select(Intron.GeneName.GeneID, Chr, Start, End, gene_name, ensID,p.diff, IRratio.diff, p0.05_reliable) %>% mutate(condition = "CTRL")
+vcp <- ac_vcp_cyt_vs_nuc %>% dplyr::filter(p0.05_reliable == "significant") %>% dplyr::select(Intron.GeneName.GeneID, Chr, Start, End, gene_name, ensID,p.diff, IRratio.diff, p0.05_reliable) %>% mutate(condition = "VCP")
+ctrl_vcp <- bind_rows(ctrl, vcp)
+ctrl_vcp$condition <- factor(ctrl_vcp$condition, levels = c("VCP", "CTRL"))
+# Sina violin plot: IR ratio LFC Cyt vs Nuc
+cyt_vs_nuc_sina_plot <- sinaplot.one.sample(data =  filter(ctrl_vcp, p0.05_reliable == "significant"), groups = "condition", continuous = "IRratio.diff", labels = "gene_name", colours = 2,  label_number = 0, stat.y.position = 0.5, flip = "no") + ylab(label = expression(Delta~IR~ratio~Cyto-Nucleus) ) + xlab("") + ylim(c(-0.5,0.5)) +
+  geom_segment(aes(x = 2.5, xend = 2.5, y= 0.1, yend= 0.4), arrow=arrow(length=unit(0.4,"cm")), color = "dodgerblue") +
+  geom_segment(aes(x = 2.5, xend = 2.5, y= -0.1, yend= -0.4),arrow=arrow(length=unit(0.4,"cm")), color = "firebrick2") +
+  annotate("text", x = 2.3, y = 0.45, label = "cytoplasm", size = 2.8, colour = "dodgerblue") +   annotate("text", x = 2.3, y = -0.45, label = "nuclear", size = 2.9, colour = "firebrick2")
+cyt_vs_nuc_sina_plot
+
+
+# Nuc IR & Cyto DGE violin
+nuc_ir_cyt_dge$p0.05_reliable_IRdirection.nuc <- gsub("IR", "nuc IR", nuc_ir_cyt_dge$p0.05_reliable_IRdirection)
+nucIR_cytDGE_sina_plot <- sinaplot(data = filter(nuc_ir_cyt_dge, p0.05_reliable == "significant"), groups = "p0.05_reliable_IRdirection.nuc", continuous = "log2FoldChange", stat.y.position = 1.5) + ylim(c(-1.5,1.5)) + ylab(label = expression(Cyto~DGE~VCP:CTRL)) + xlab("") +  
+  geom_segment(aes(x = 2.5, xend = 2.5, y= 0.5, yend= 1.3), arrow=arrow(length=unit(0.4,"cm")), color = "dodgerblue") +
+  geom_segment(aes(x = 2.5, xend = 2.5, y= -0.5, yend= -1.3),arrow=arrow(length=unit(0.4,"cm")), color = "firebrick2") +
+  annotate("text", x = 2.3, y = 1.4, label = "VCP Up", size = 2.8, colour = "dodgerblue") +   annotate("text", x = 2.35, y = -1.4, label = "VCP down", size = 2.9, colour = "firebrick2")
+nucIR_cytDGE_sina_plot
+
+
+# Nuc IR down & Cyto DGE up GO terms
+dge_ir_genes <- filter(nuc_ir_cyt_dge, p0.05_reliable == "significant") %>%  split(.$direction) %>%  map("ensID") # create list of IR up/down & Expression up/down genes
+dge_ir_genes <- gost(dge_ir_genes) # run gprofiler2 on all groups - runs on all KEGG, GO, REAC,TF, WP pathways simultaneously
+dge_ir_gprofiles_filt <- dge_ir_genes$result %>% filter(str_detect(source, "KEGG|GO:BP|GO:MF|GO:CC|REAC|CORUM")) %>% arrange( -log10(p_value) ) %>% mutate( term_name = as.factor(term_name)) 
+dge_ir_gprofiles_curated_irdown_expup <- dge_ir_gprofiles_filt %>% filter(query == "IR down & expression up")
+irdown_expup_curated_list <- c("Interleukin- signaling",                                                                                             
+"cellular response to cytokine stimulus",                                                                                  
+"actin cytoskeleton",                                                        
+"interferon-gamma-mediated signaling pathway",                                                                              
+"cytokine-mediated signaling pathway",                                                                      
+"cell death",                                                                                           
+"response to cytokine",                                                                                  
+"NIK-->noncanonical NF-kB signaling",                                                                    
+# "Regulation of Apoptosis",                                                                                 
+"positive regulation of Wnt signaling pathway",                                                          
+"Nonsense-Mediated Decay (NMD)",                                                                          
+"Dectin- mediated noncanonical NF-kB signaling",                                                            
+"Downstream signaling events of B Cell Receptor (BCR)",                                                                                                                                 
+# "Infectious disease",                                                                                     
+"gene expression",                                                                                         
+"Antigen processing-Cross presentation",                                                                                                                                                      
+"Cellular responses to stress",                                                                                                                                                              
+# "peptide biosynthetic process",                                                                                                                                                       
+# "extracellular exosome",                                                                             
+"Metabolism of RNA",
+# "cellular protein metabolic process",                                                                             
+"Translation",                                                                                             
+"viral process",
+# "RNA binding",                                                                                             
+# "nucleus",                                                                                                                                                                              
+"focal adhesion")
+dge_ir_gprofiles_curated_irdown_expup <- dge_ir_gprofiles_filt %>% filter(query == "IR down & expression up")  %>% filter(term_name %in% irdown_expup_curated_list) %>% mutate(query = "")
+dge_ir_gprofiles_curated_irdown_expup$term_name <- strtrim(dge_ir_gprofiles_curated_irdown_expup$term_name, 38) # limit term_name string length
+dge_ir_gprofiles_curated_irdown_expup$term_name <- gsub("interferon-gamma-mediated signaling pa", "interferon-gamma-mediated signaling", dge_ir_gprofiles_curated_irdown_expup$term_name)
+dge_ir_gprofiles_curated_irdown_expup$term_name <- gsub("positive regulation of Wnt signaling p", "positive regulation of Wnt signaling", dge_ir_gprofiles_curated_irdown_expup$term_name)
+ir_down_expup_go_curated <- curated_profiles(gprofiles = dge_ir_gprofiles_curated_irdown_expup, colours = "firebrick2") 
+ir_down_expup_go_curated
+
+# 4J Liddelow heatmap Nuc IR & Cyt DGE 
+annot <- data.frame(row.names = astrocyte.reactivity.markers$gene_name, group = factor(astrocyte.reactivity.markers$group))
+annot_cols <- c("black", "firebrick2", "dodgerblue3")
+names(annot_cols) <- unique(astrocyte.reactivity.markers$group)
+annot_cols <- list(group = annot_cols)
+breaksList = seq(-2, 2, by = 0.1) 
+dge_ir_filt <- ac_nucIR_cytDGE.absoluteIR %>% filter(gene_name %in% astrocyte.reactive.genes) %>% arrange(IR.lfc) %>% distinct(gene_name, .keep_all = TRUE) %>%
+  dplyr::select(gene_name, "Nuclear IR" = IR.lfc, "Cyto DGE" = log2FoldChange)
+dge_ir_filt$"Nuclear IR" <- replace_na(dge_ir_filt$"Nuclear IR", 0)
+dge_ir_filt$"Cyto DGE" <- replace_na(dge_ir_filt$"Cyto DGE", 0)
+dge_ir_filt <- dge_ir_filt %>% arrange(factor(gene_name, levels = rownames(annot))) # order the matrix by the annotation dataframe
+dge_ir_filt.mat <- make_matrix(select(dge_ir_filt,-gene_name),pull(dge_ir_filt,gene_name))
+dge_ir_filt.mat[dge_ir_filt.mat == -Inf] <- -2.0
+dge_ir_filt.mat[dge_ir_filt.mat == Inf] <- 2.0
+dge_ir_filt.mat[dge_ir_filt.mat == NA] <- 0
+dge_ir_filt.mat[dge_ir_filt.mat > 2.0] <- 2.0
+dge_ir_filt.mat[dge_ir_filt.mat < -2.0] <- -2.0
+nuc_ir_cyt_dge.all <- cleanIRFinder(IRFinder = ac_nuc_vcp_vs_ctrl.IRFinder) %>% full_join(dge_res_ac_cyt_vcp_vs_ctrl, by = c("ensID", "gene_name")) # FULL join deseq2 results to avoid loosing DGE values where no IR values exist
+dge_res_padj <- nuc_ir_cyt_dge.all %>% filter(gene_name %in% astrocyte.reactive.genes) %>% arrange(IR.lfc) %>% distinct(gene_name, .keep_all = TRUE) %>%
+  mutate(IR.sig = case_when(p0.05_reliable == "significant" ~ "\u2217", TRUE ~ ""), DGE.sig = case_when(padj <= 0.05 ~  "\u2217", TRUE ~ "")) %>%
+  dplyr::select(gene_name, IR.sig, DGE.sig) %>%
+  arrange(factor(gene_name, levels = rownames(annot))) %>% dplyr::select(IR.sig,DGE.sig) %>%  as.matrix  # order the matrix by the annotation dataframe
+ac_nucIR_cytDGE_liddelow_heatmap <- pheatmap(t(dge_ir_filt.mat), cluster_rows=F, show_rownames=T, show_colnames = T, cluster_cols=F, fontsize = 8,
+                  gaps_col = c(13,29), gaps_row = 1,
+                  annotation_col = annot, annotation_names_col = F, annotation_legend = FALSE, annotation_colors = annot_cols, main = "", display_numbers = t(dge_res_padj), 
+                  color = colorRampPalette(rev(greenred(75)))(length(breaksList)),breaks = breaksList,
+                  cellheight = 10, cellwidth = 11.5, border_color=NA)
+```
+
+### Merge 
+
+```{r}
+fig4.merged <- ggarrange(
+  ggarrange(GAPDH_Intron_plot, Malat1_plot, NEAT_plot, GAPDH_Exon_plot, nrow = 1, ncol = 4, labels = c("C")),
+  ggarrange(nuc_ma, ir_down_expup_go_curated, ncol = 2, labels = c("D", "E"), widths = c(1,1)),
+  ggarrange(nuc_cyt_sina_plot, cyt_vs_nuc_sina_plot, nucIR_cytDGE_sina_plot, labels = c("F", "G", "H"), ncol = 3, widths = c(1,1,1)),
+  NULL,
+  ggarrange(annotate_figure(ac_nucIR_cytDGE_liddelow_heatmap[[4]],  bottom = text_grob("Pan-reactive                                       A1                                                 A2", color = "black", hjust = 0.6, vjust = -12, x = 0.5, face = "italic", size = 10)), labels = "J"), # fourth row
+  nrow = 5, heights = c(0.7, 1.2, 1.1, 0.01, 0.5))
+fig4.merged
+ggsave(fig4.merged, filename = "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/irlib/figures/fig4.merged.png", height = 9, width = 8.25)
+```
+
+
+## Figure S6
+
+```{r}
+gr_introns <- as.GenomicRange(ac_nuc_vcp_vs_ctrl$Intron.GeneName.GeneID.Coords)
+seqlevelsStyle(gr_introns) <- "UCSC"
+ac_nuc_vcp_vs_ctrl$phast_cons <- gscores(phast, gr_introns)$default # takes ~1min - too slow to add to function
+nuclear <- ac_nuc_vcp_vs_ctrl %>% dplyr::select(Intron.GeneName.GeneID.Coords, coords, intron_length, gc_content, reliable_retained, retained, p0.05_reliable, p0.05_reliable_IRdirection, phast_cons) %>% dplyr::mutate(fraction = "nuclear")
+gr_introns <- as.GenomicRange(ac_cyt_vcp_vs_ctrl$Intron.GeneName.GeneID.Coords)
+seqlevelsStyle(gr_introns) <- "UCSC"
+ac_cyt_vcp_vs_ctrl$phast_cons <- gscores(phast, gr_introns)$default # takes ~1min - too slow to add to function
+cytoplasmic <- ac_cyt_vcp_vs_ctrl %>% dplyr::select(Intron.GeneName.GeneID.Coords, coords, intron_length, gc_content, reliable_retained, retained,p0.05_reliable, p0.05_reliable_IRdirection, phast_cons) %>% dplyr::mutate(fraction = "cytoplasmic")
+nuc_cyt <- bind_rows(nuclear, cytoplasmic)
+
+# GC Content in Fractions -------------------
+# Cytoplasmic vs nuclear retained introns
+gc.retained_spliced.nuc_cyt.sina_plot <- ggplot(nuc_cyt, aes(x = reliable_retained, y= gc_content, color = reliable_retained)) + 
+      geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = nuc_cyt, aes(fill = reliable_retained), colour = "black", width=0.2, outlier.shape = NA) +
+      scale_colour_manual(values = get_palette("npg",4)) + scale_fill_manual(values = get_palette("npg",4)) +  
+      theme_classic() + theme(legend.position = "none", axis.text=element_text(size=12)) +
+      geom_hline(yintercept = 0.5, linetype = 2) + facet_wrap(. ~ fraction) +
+      stat_compare_means(comparisons = list(c("retained", "spliced")), label = "p.signif") + ylab(label = expression(mean~GC~content) ) + xlab("")
+gc.retained_spliced.nuc_cyt.sina_plot
+
+# IR up vs IR down in fractions
+gc.IRup_IRdown.nuc_cyt.sina_plot <- ggplot(dplyr::filter(nuc_cyt, p0.05_reliable == "significant"), aes(x = p0.05_reliable_IRdirection, y= gc_content, color = p0.05_reliable_IRdirection)) + 
+      geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = dplyr::filter(nuc_cyt, p0.05_reliable == "significant"), aes(fill = p0.05_reliable_IRdirection), colour = "black", width=0.2, outlier.shape = NA) +
+      scale_colour_manual(values = get_palette("npg",4)) + scale_fill_manual(values = get_palette("npg",4)) +  
+      theme_classic() + theme(legend.position = "none", axis.text=element_text(size=12)) +
+      geom_hline(yintercept = 0.5, linetype = 2) + facet_wrap(. ~ fraction)+
+      stat_compare_means(comparisons = list(c("IR down", "IR up")), label = "p.signif") + ylab(label = expression(mean~GC~content) ) + xlab("")
+gc.IRup_IRdown.nuc_cyt.sina_plot
+
+ 
+# Intron lengths in fractions -------------------------------
+# Cytoplasmic vs nuclear retained introns
+intron_length.retained_spliced.nuc_cyt.sina_plot <- ggplot(nuc_cyt, aes(x = reliable_retained, y= intron_length, color = reliable_retained)) + 
+      geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = nuc_cyt, aes(fill = reliable_retained), colour = "black", width=0.2, outlier.shape = NA) +
+      scale_colour_manual(values = get_palette("npg",4)) + scale_fill_manual(values = get_palette("npg",4)) +  
+      theme_classic() + theme(legend.position = "none", axis.text=element_text(size=12)) +
+      facet_wrap(. ~ fraction) +
+      stat_compare_means(comparisons = list(c("retained", "spliced")), label = "p.signif") + ylab(label = expression(log[10]~mean~intron~length) ) + xlab("") +  scale_y_log10() 
+intron_length.retained_spliced.nuc_cyt.sina_plot
+
+# IR up vs IR down in fractions
+intron_length.IRup_IRdown.nuc_cyt.sina_plot <- ggplot(dplyr::filter(nuc_cyt, p0.05_reliable == "significant"), aes(x = p0.05_reliable_IRdirection, y= intron_length, color = p0.05_reliable_IRdirection)) + 
+      geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = dplyr::filter(nuc_cyt, p0.05_reliable == "significant"), aes(fill = p0.05_reliable_IRdirection), colour = "black", width=0.2, outlier.shape = NA) +
+      scale_colour_manual(values = get_palette("npg",4)) + scale_fill_manual(values = get_palette("npg",4)) +  
+      theme_classic() + theme(legend.position = "none", axis.text=element_text(size=12)) +
+      facet_wrap(. ~ fraction)+
+      stat_compare_means(comparisons = list(c("IR down", "IR up")), label = "p.signif") + ylab(label = expression(log[10]~mean~intron~length) ) + xlab("") +  scale_y_log10() 
+intron_length.IRup_IRdown.nuc_cyt.sina_plot
+
+
+# PhastCons Score: conservation score -------------------------------
+# Cytoplasmic vs nuclear retained introns
+PhastCons.retained_spliced.nuc_cyt.sina_plot <- ggplot(nuc_cyt, aes(x = reliable_retained, y= phast_cons, color = reliable_retained)) + 
+      geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = nuc_cyt, aes(fill = reliable_retained), colour = "black", width=0.2, outlier.shape = NA) +
+      scale_colour_manual(values = get_palette("npg",4)) + scale_fill_manual(values = get_palette("npg",4)) +  
+      theme_classic() + theme(legend.position = "none", axis.text=element_text(size=12)) +
+      facet_wrap(. ~ fraction) +
+      stat_compare_means(comparisons = list(c("retained", "spliced")), label = "p.signif") + ylab(label = expression(log[10]~mean~phast~conservation~score) ) + xlab("") +  scale_y_log10() 
+PhastCons.retained_spliced.nuc_cyt.sina_plot
+
+# IR up vs IR down in fractions
+PhastCons.IRup_IRdown.nuc_cyt.sina_plot <- ggplot(dplyr::filter(nuc_cyt, p0.05_reliable == "significant"), aes(x = p0.05_reliable_IRdirection, y= phast_cons, color = p0.05_reliable_IRdirection)) + 
+      geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = dplyr::filter(nuc_cyt, p0.05_reliable == "significant"), aes(fill = p0.05_reliable_IRdirection), colour = "black", width=0.2, outlier.shape = NA) +
+      scale_colour_manual(values = get_palette("npg",4)) + scale_fill_manual(values = get_palette("npg",4)) +  
+      theme_classic() + theme(legend.position = "none", axis.text=element_text(size=12)) +
+      facet_wrap(. ~ fraction)+
+      stat_compare_means(comparisons = list(c("IR down", "IR up")), label = "p.signif") + ylab(label = expression(log[10]~mean~phast~conservation~score) ) + xlab("") +  scale_y_log10() 
+PhastCons.IRup_IRdown.nuc_cyt.sina_plot
+
+iclip_scores_normalised <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/ac_nuc_cyt.vcp_vs_ctrl.CLIPscores")
+iclip_scores_normalised.filt <- iclip_scores_normalised %>% select(coords, "iclip_enrichment" = sum)
+iclip_scores_normalised.filt <- aggregate(iclip_scores_normalised.filt$iclip_enrichment, list(coords = iclip_scores_normalised.filt$coords), FUN = mean) %>% drop_na
+nuc_cyt$iclip_enrichment <- iclip_scores_normalised.filt$x[match(nuc_cyt$coords,iclip_scores_normalised.filt$coords)];
+# set NA to 0
+nuc_cyt$iclip_enrichment[is.na(nuc_cyt$iclip_enrichment)] <- 0  # set NA scores to 0
+
+# iCLIP xlinks score -------------------------------
+# Cytoplasmic vs nuclear retained introns
+CLIP.retained_spliced.sina_plot <- ggplot(nuc_cyt, aes(x = reliable_retained, y= iclip_enrichment, color = reliable_retained)) + 
+      geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = nuc_cyt, aes(fill = reliable_retained), colour = "black", width=0.2, outlier.shape = NA) +
+      scale_colour_manual(values = get_palette("npg",4)) + scale_fill_manual(values = get_palette("npg",4)) +  
+      theme_classic() + theme(legend.position = "none", axis.text=element_text(size=12)) +
+      facet_wrap(. ~ fraction) +
+      stat_compare_means(comparisons = list(c("retained", "spliced")), label = "p.signif") + ylab(label = expression(log[10]~normalised~iCLIP~xlinks~score~sum) ) + xlab("") +  scale_y_log10() 
+CLIP.retained_spliced.sina_plot
+
+# IR up vs IR down in fractions
+CLIP.IRup_IRdown.sina_plot <- ggplot(dplyr::filter(nuc_cyt, p0.05_reliable == "significant"), aes(x = p0.05_reliable_IRdirection, y= iclip_enrichment, color = p0.05_reliable_IRdirection)) + 
+      geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = dplyr::filter(nuc_cyt, p0.05_reliable == "significant"), aes(fill = p0.05_reliable_IRdirection), colour = "black", width=0.2, outlier.shape = NA) +
+      scale_colour_manual(values = get_palette("npg",4)) + scale_fill_manual(values = get_palette("npg",4)) +  
+      theme_classic() + theme(legend.position = "none", axis.text=element_text(size=12)) +
+      facet_wrap(. ~ fraction)+
+      stat_compare_means(comparisons = list(c("IR down", "IR up")), label = "p.signif") + ylab(label = expression(log[10]~normalised~iCLIP~xlinks~score~sum) ) + xlab("") +  scale_y_log10() 
+CLIP.IRup_IRdown.sina_plot
+```
+
+### Merge
+
+```{r}
+figS6.merged <- ggarrange(
+  ggarrange(gc.retained_spliced.nuc_cyt.sina_plot, gc.IRup_IRdown.nuc_cyt.sina_plot, ncol = 2, labels = "A", widths = c(1,1)),
+  ggarrange(intron_length.retained_spliced.nuc_cyt.sina_plot, intron_length.IRup_IRdown.nuc_cyt.sina_plot, ncol = 2, labels = "B", widths = c(1,1)),
+  ggarrange(PhastCons.retained_spliced.nuc_cyt.sina_plot, PhastCons.IRup_IRdown.nuc_cyt.sina_plot, ncol = 2, labels = "C", widths = c(1,1)),
+  ggarrange(CLIP.retained_spliced.sina_plot, CLIP.IRup_IRdown.sina_plot, ncol = 2, labels = "D", widths = c(1,1)),
+  nrow = 4, heights = c(1,1,1,1))
+figS6.merged
+ggsave(figS6.merged, filename = "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/irlib/figures/figS6.merged.png", height = 15, width = 10)
+```
+
+## Table S7
+
+Mass spec cytoplasmic & IR nuclear results
+
+```{r}
+ac_nucIR_cytDGE.absoluteIR %>% filter(vcp_vs_ctrl_ratio > 0 & IRratio.diff < 0) %>% distinct(gene_name, .keep_all = TRUE) %>% dplyr::select(gene_name, ensID, "intron_coords" = coords, IRratio.diff, mass_spec.log2FoldChange = vcp_vs_ctrl_ratio, massspec_ir_direction) %>% write.csv(., "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/irlib/results/ac_cyt_vcp_vs_ctrl.mass_spec_results.csv")
+```
+
+
