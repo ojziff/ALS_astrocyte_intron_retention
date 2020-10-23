@@ -17,7 +17,24 @@ editor_options:
 .libPaths("/camp/lab/luscomben/home/users/ziffo/.conda/envs/rtest/lib/R/library")
 source("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/scripts/irfinder_functions.R")
 
-# Import pooled replicate quantified IRFinder Output for each condition i.e. not differentially compared (IRFinder-IR-dir.txt or if not stranded, then IRFinder-IR-nondir.txt or )
+# import gene expression results generated using deseq2_analysis.Rmd script (using HTSeq counts in intersection-strict mode)
+dge_res_ac_who_vcp_vs_ctrl <- readRDS("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/res_ac_who_vcp_vs_ctrl.RDS")
+dge_res_ac_nuc_vcp_vs_ctrl <- readRDS("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/res_ac_nuc_vcp_vs_ctrl.RDS")
+dge_res_ac_cyt_vcp_vs_ctrl <- readRDS("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/res_ac_cyt_vcp_vs_ctrl.RDS")
+dge_res_ac_ctrl_cyt_vs_nuc <- readRDS("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/res_ac_ctrl_cyt_vs_nuc.RDS")
+dge_res_ac_vcp_cyt_vs_nuc <- readRDS("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/res_ac_vcp_cyt_vs_nuc.RDS")
+dge_res_ac_tyz_sod1_vs_ctrl <- readRDS("/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-ipsc-tyzack-2017/expression/deseq2/res_ac_tyz_sod1_vs_ctrl.RDS")
+dge_res_ac_bir_c9orf_vs_ctrl <- readRDS("/camp/home/ziffo/home/downloaded-public-data/astrocyte-c9orf72-ipsc-birger-2019/expression/deseq2/res_ac_bir_c9orf_vs_ctrl.RDS")
+dge_res_ac_bar_a1_vs_a0 <- readRDS("/camp/home/ziffo/home/downloaded-public-data/reactive-astrocyte-barbar-2020/expression/deseq/res_ac_bar_a1_vs_a0.RDS")
+dge_res_ac_mou_sod1_vs_ctrl <- readRDS("/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-mouse-bacTRAP-cleveland-2015/expression/deseq/res_ac_mou_sod1_vs_ctrl.RDS")
+
+# import mass spec results generated using DEP_analysis.Rmd script
+nuc_mass_spec_results <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/nuclear_mass_spec_results.RDS")
+cyt_mass_spec_results <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/cytoplasmic_mass_spec_results.RDS")
+ctrl_mass_spec_results <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/ctrl_mass_spec_results.RDS")
+vcp_mass_spec_results <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/vcp_mass_spec_results.RDS")
+
+# Import pooled replicate quantified IRFinder Output for each condition (IRFinder-IR-dir.txt or if not stranded, then IRFinder-IR-nondir.txt) generated using IRFinder_pool_replicates script
 ac_who_ctrl.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/pooled_ac_who_ctrl/IRFinder-IR-dir.txt", sep = '\t',header = TRUE)
 ac_who_vcp.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/pooled_ac_who_vcp/IRFinder-IR-dir.txt", sep = '\t',header = TRUE)
 ac_nuc_ctrl.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/pooled_ac_nuc_ctrl/IRFinder-IR-dir.txt", sep = '\t',header = TRUE)
@@ -44,7 +61,7 @@ ac_tyz_sod1.IR <- cleanIRFinderQuant(ac_tyz_sod1.IRFinder)
 ac_bar_a0.IR <- cleanIRFinderQuant(ac_bar_a0.IRFinder)
 ac_bar_a1.IR <- cleanIRFinderQuant(ac_bar_a1.IRFinder)
 
-# Import already compared IRFinder output:
+# Import differentially compared IRFinder output generated using IRFinder_differential script
 ac_who_vcp_vs_ctrl.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/ac_who_vcp-vs-ctrl.txt", sep = '\t',header = TRUE)
 ac_nuc_vcp_vs_ctrl.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/ac_nuc_vcp-vs-ctrl.txt", sep = '\t',header = TRUE)
 ac_cyt_vcp_vs_ctrl.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/ac_cyt_vcp-vs-ctrl.txt", sep = '\t',header = TRUE)
@@ -55,26 +72,7 @@ ac_tyz_sod1_vs_ctrl.IRFinder <- read.table("/camp/home/ziffo/home/projects/astro
 ac_bar_a1_vs_a0.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/ac_bar_a1-vs-a0.txt", sep = '\t',header = TRUE)
 ac_mou_sod1_vs_ctrl.IRFinder <- read.table("/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-mouse-bacTRAP-cleveland-2015/splicing/IRFinder/ac_mou_sod1_vs_ctrl.txt", sep = '\t',header = TRUE)
 
-# import gene expression results (using HTSeq counts in intersection-strict mode)
-dge_res_ac_who_vcp_vs_ctrl <- readRDS("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/res_ac_who_vcp_vs_ctrl.RDS")
-dge_res_ac_nuc_vcp_vs_ctrl <- readRDS("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/res_ac_nuc_vcp_vs_ctrl.RDS")
-dge_res_ac_cyt_vcp_vs_ctrl <- readRDS("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/res_ac_cyt_vcp_vs_ctrl.RDS")
-dge_res_ac_ctrl_cyt_vs_nuc <- readRDS("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/res_ac_ctrl_cyt_vs_nuc.RDS")
-dge_res_ac_vcp_cyt_vs_nuc <- readRDS("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/res_ac_vcp_cyt_vs_nuc.RDS")
-dge_res_ac_tyz_sod1_vs_ctrl <- readRDS("/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-ipsc-tyzack-2017/expression/deseq2/res_ac_tyz_sod1_vs_ctrl.RDS")
-dge_res_ac_bir_c9orf_vs_ctrl <- readRDS("/camp/home/ziffo/home/downloaded-public-data/astrocyte-c9orf72-ipsc-birger-2019/expression/deseq2/res_ac_bir_c9orf_vs_ctrl.RDS")
-dge_res_ac_bar_a1_vs_a0 <- readRDS("/camp/home/ziffo/home/downloaded-public-data/reactive-astrocyte-barbar-2020/expression/deseq/res_ac_bar_a1_vs_a0.RDS")
-dge_res_ac_mou_sod1_vs_ctrl <- readRDS("/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-mouse-bacTRAP-cleveland-2015/expression/deseq/res_ac_mou_sod1_vs_ctrl.RDS")
-
-# import mass spec results
-mass_spec_ac_vcp_vs_ctrl_stp <- read_excel("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/ac_vcp_fractions_mass_spectrometry_doaa.xlsx", sheet = "All Protein data")
-mass_spec_ac <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/ac_vcp_fractions_massspec_protein_groups.txt", sep = '\t',header = TRUE)
-nuc_mass_spec_results <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/nuclear_mass_spec_results.RDS")
-cyt_mass_spec_results <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/cytoplasmic_mass_spec_results.RDS")
-ctrl_mass_spec_results <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/ctrl_mass_spec_results.RDS")
-vcp_mass_spec_results <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/vcp_mass_spec_results.RDS")
-
-# clean IRFinder results
+# Merge gene expression (DESeq2), mass spec (DEP), and differential splicing (IRFinder) results
 ac_who_vcp_vs_ctrl <- cleanIRFinder(IRFinder = ac_who_vcp_vs_ctrl.IRFinder, deseq_res = dge_res_ac_who_vcp_vs_ctrl)
 ac_nuc_vcp_vs_ctrl <- cleanIRFinder(IRFinder = ac_nuc_vcp_vs_ctrl.IRFinder, deseq_res = dge_res_ac_nuc_vcp_vs_ctrl, mass_spec = nuc_mass_spec_results)
 ac_cyt_vcp_vs_ctrl <- cleanIRFinder(IRFinder = ac_cyt_vcp_vs_ctrl.IRFinder, deseq_res = dge_res_ac_cyt_vcp_vs_ctrl, mass_spec = cyt_mass_spec_results)
@@ -86,7 +84,7 @@ ac_tyz_sod1_vs_ctrl <- cleanIRFinder(IRFinder = ac_tyz_sod1_vs_ctrl.IRFinder, de
 ac_bar_a1_vs_a0 <- cleanIRFinder(IRFinder = ac_bar_a1_vs_a0.IRFinder, deseq_res = dge_res_ac_bar_a1_vs_a0)
 ac_mou_sod1_vs_ctrl <- cleanIRFinder(IRFinder = ac_mou_sod1_vs_ctrl.IRFinder, deseq_res = dge_res_ac_mou_sod1_vs_ctrl, species = "Mmusculus")
 
-# absolute IR compared
+# Merge gene expression (DESeq2), mass spec (DEP), and absolute splicing (IRFinder) results
 ac_who_vcp_vs_ctrl.absoluteIR <- cleanIRFinderQuantCompared(mutant = ac_who_vcp.IR, control = ac_who_ctrl.IR, deseq_res = dge_res_ac_who_vcp_vs_ctrl)
 ac_nuc_vcp_vs_ctrl.absoluteIR <- cleanIRFinderQuantCompared(mutant = ac_nuc_vcp.IR, control = ac_nuc_ctrl.IR, deseq_res = dge_res_ac_nuc_vcp_vs_ctrl)
 ac_cyt_vcp_vs_ctrl.absoluteIR <- cleanIRFinderQuantCompared(mutant = ac_cyt_vcp.IR, control = ac_cyt_ctrl.IR, deseq_res = dge_res_ac_cyt_vcp_vs_ctrl)
@@ -227,41 +225,6 @@ fig1.merged <- ggarrange(vcp_sod1_c9orf_a1_sina_plot,
   nrow = 4, heights = c(1.1, 1.3, 1.3, 0.9), labels = c("C", "", "", "H"))
 fig1.merged
 ggsave(fig1.merged, filename = "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/irlib/figures/fig1.merged.png", height = 10, width = 11)
-```
-
-
-### Figure S1B PCA & dendrogram
-
-```{r}
-patani <- read.csv("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/sample-details/sample_table.csv")
-patani <- patani[!patani$cellline == "ctrl2",] # remove CTRL2 samples due to batch effects
-patani$cellline <- patani$cellline %>% gsub("ctrl5", "ctrl2", .) # for the paper we rename ctrl5 as ctrl2 to avoid confusion as to why we have ctrl1 & 5 (but not 2,3 and 4)
-patani <- patani %>% distinct(fraction_cellline, .keep_all = TRUE) # remove rows for technical repeats
-patani <- patani %>% mutate(mutation = as.factor(vcp), fraction = factor(fraction, levels = c("whole", "nuclear", "cytoplasmic")))
-patani$condition <- gsub("vcp", "als", patani$mutation)
-patani$condition <- factor(patani$condition, levels = c("ctrl", "als")) # set the reference control first to ensure comparison is ALS vs CTRL (rather than CTRL vs ALS)
-patani$sample <- patani$fraction_cellline %>% gsub("whole", "who", .) %>% gsub("nuclear", "nuc", .) %>% gsub("cytoplasmic", "cyt", .) #%>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .)
-patani$sample <- paste("ac_",patani$sample,sep="")
-patani$patient <- patani$cellline %>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .)
-patani <- patani %>% dplyr::filter(fraction == "whole") # astrocyte whole-cell samples for VCP only
-sampleTable <- patani %>% dplyr::select(sampleName=fraction_cellline, condition, fraction, mutation, cellline, patient, sample) %>% mutate(fileName = paste(sample, ".tab", sep = ""), patient_fraction = paste(patient, fraction, sep = "_")) %>% dplyr::select(sampleName, fileName, condition, everything())
-htseqdir <- "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/alignment/htseq"
-dds <- DESeqDataSetFromHTSeqCount(sampleTable = sampleTable, directory = htseqdir, design = ~ condition) # create DESeqDataSet with this design - Import htseq .tab tables
-dds <- DESeq(dds) # run DESeq2
-vsd_ac_who_vcp_vs_ctrl <- vst(dds, blind=FALSE) # VST transformation
-colnames(vsd_ac_who_vcp_vs_ctrl) <- colnames(vsd_ac_who_vcp_vs_ctrl) %>% gsub("whole_", "", .) %>% gsub("5", "2", .) %>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .) # Labels for mutants are based on VCP mutation. R155C mutant = GLIA. R191Q mutant = CB1E.
-pcaData_astrocyte <- plotPCA(vsd_ac_who_vcp_vs_ctrl, intgroup=c("sample", "condition", "mutation", "cellline","fraction", "patient_fraction", "patient"), returnData=TRUE)
-percentVar_astrocyte <- round(100 * attr(pcaData_astrocyte, "percentVar"))
-ac_who_pca <- ggplot(pcaData_astrocyte, aes(PC1, PC2, color=mutation)) + geom_text_repel(aes(label=patient), size = 3) + scale_colour_manual( values = c("dodgerblue", "firebrick2") ) +  theme_bw() +  
-  theme(panel.grid = element_blank(), legend.title = element_blank(), legend.text=element_text(size=8), legend.position = "right", legend.box = "vertical", legend.spacing = unit(0.2, 'cm')) + geom_point(size=2) + 
-  xlab(paste0("PC1: ",percentVar_astrocyte[1],"% variance")) +  ylab(paste0("PC2: ",percentVar_astrocyte[2],"% variance")) + coord_fixed()
-sampleDists <- dist(t(assay(vsd_ac_who_vcp_vs_ctrl)))
-hc <- hclust(sampleDists, method = "ward.D2")
-a <- c("dodgerblue", "dodgerblue", "firebrick2","firebrick2")
-ac_who_dendrogram <- ggdendrogram(hc, rotate = TRUE, theme_dendro = FALSE) +  theme_classic()  + theme(axis.line=element_blank(), axis.title.x=element_blank(), axis.title.y=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.text.y= element_text(colour = a), strip.background = element_rect(colour="black", fill="white"), panel.grid = element_blank()) 
-# merge PCA & dendrogram
-ac_who_pca_dendrogram <- ggarrange(ac_who_pca, ac_who_dendrogram, nrow = 1, ncol = 2, widths = c(3,1))
-ggsave(ac_who_pca_dendrogram, filename = "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/irlib/figures/Fig1B_C.ac_who_pca_dendrogram.png", height = 2.5, width = 5)
 ```
 
 ## Figure S1
