@@ -28,12 +28,6 @@ dge_res_ac_bir_c9orf_vs_ctrl <- readRDS("/camp/home/ziffo/home/downloaded-public
 dge_res_ac_bar_a1_vs_a0 <- readRDS("/camp/home/ziffo/home/downloaded-public-data/reactive-astrocyte-barbar-2020/expression/deseq/res_ac_bar_a1_vs_a0.RDS")
 dge_res_ac_mou_sod1_vs_ctrl <- readRDS("/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-mouse-bacTRAP-cleveland-2015/expression/deseq/res_ac_mou_sod1_vs_ctrl.RDS")
 
-# import mass spec results generated using DEP_analysis.Rmd script
-nuc_mass_spec_results <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/nuclear_mass_spec_results.RDS")
-cyt_mass_spec_results <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/cytoplasmic_mass_spec_results.RDS")
-ctrl_mass_spec_results <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/ctrl_mass_spec_results.RDS")
-vcp_mass_spec_results <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/vcp_mass_spec_results.RDS")
-
 # Import pooled replicate quantified IRFinder Output for each condition (IRFinder-IR-dir.txt or if not stranded, then IRFinder-IR-nondir.txt) generated using IRFinder_pool_replicates script
 ac_who_ctrl.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/pooled_ac_who_ctrl/IRFinder-IR-dir.txt", sep = '\t',header = TRUE)
 ac_who_vcp.IRFinder <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/pooled_ac_who_vcp/IRFinder-IR-dir.txt", sep = '\t',header = TRUE)
@@ -74,8 +68,8 @@ ac_mou_sod1_vs_ctrl.IRFinder <- read.table("/camp/home/ziffo/home/downloaded-pub
 
 # Merge gene expression (DESeq2), mass spec (DEP), and differential splicing (IRFinder) results
 ac_who_vcp_vs_ctrl <- cleanIRFinder(IRFinder = ac_who_vcp_vs_ctrl.IRFinder, deseq_res = dge_res_ac_who_vcp_vs_ctrl)
-ac_nuc_vcp_vs_ctrl <- cleanIRFinder(IRFinder = ac_nuc_vcp_vs_ctrl.IRFinder, deseq_res = dge_res_ac_nuc_vcp_vs_ctrl, mass_spec = nuc_mass_spec_results)
-ac_cyt_vcp_vs_ctrl <- cleanIRFinder(IRFinder = ac_cyt_vcp_vs_ctrl.IRFinder, deseq_res = dge_res_ac_cyt_vcp_vs_ctrl, mass_spec = cyt_mass_spec_results)
+ac_nuc_vcp_vs_ctrl <- cleanIRFinder(IRFinder = ac_nuc_vcp_vs_ctrl.IRFinder, deseq_res = dge_res_ac_nuc_vcp_vs_ctrl)
+ac_cyt_vcp_vs_ctrl <- cleanIRFinder(IRFinder = ac_cyt_vcp_vs_ctrl.IRFinder, deseq_res = dge_res_ac_cyt_vcp_vs_ctrl)
 ac_ctrl_cyt_vs_nuc <- cleanIRFinder(IRFinder = ac_ctrl_cyt_vs_nuc.IRFinder, deseq_res = dge_res_ac_ctrl_cyt_vs_nuc)
 ac_vcp_cyt_vs_nuc <- cleanIRFinder(IRFinder = ac_vcp_cyt_vs_nuc.IRFinder, deseq_res = dge_res_ac_vcp_cyt_vs_nuc)
 nuc_ir_cyt_dge <- cleanIRFinder(IRFinder = ac_nuc_vcp_vs_ctrl.IRFinder, deseq_res = dge_res_ac_cyt_vcp_vs_ctrl)
@@ -963,8 +957,6 @@ IRdown_DGEup_overlap <- cbindX(arrange(as_tibble_col(IRdown_DGEup_SOD1[IRdown_DG
                          arrange(as_tibble_col(DGEup_TRAP[DGEup_TRAP %in% IRdown_DGEup_A1], column_name = "SOD1G37R.TRAP_Reactive"), SOD1G37R.TRAP_Reactive))
 IRdown_DGEup_overlap[is.na(IRdown_DGEup_overlap)] <- ""
 write.csv(IRdown_DGEup_overlap, "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/irlib/results/IRdown_DGEup.overlap.csv")
-
-IRdown_A1_ALS[IRdown_A1_ALS %in% all.reactivity.go] # "HSPG2"   "PSMD11"  "NFKBIZ"  "DNAJC2"  "ERF"     "TINF2"   "OSMR"    "TNIK"    "ILK"     "NUP188"  "STIP1"   "TBK1"    "MCAM"    "ARHGEF2" "NT5C3A"  "FN1"     "POLR3C"
 ```
 
 ## Figure 3
@@ -1792,13 +1784,3 @@ figS6.merged <- ggarrange(
 figS6.merged
 ggsave(figS6.merged, filename = "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/irlib/figures/figS6.merged.png", height = 15, width = 10)
 ```
-
-## Table S7
-
-Mass spec cytoplasmic & IR nuclear results
-
-```{r}
-ac_nucIR_cytDGE.absoluteIR %>% filter(vcp_vs_ctrl_ratio > 0 & IRratio.diff < 0) %>% distinct(gene_name, .keep_all = TRUE) %>% dplyr::select(gene_name, ensID, "intron_coords" = coords, IRratio.diff, mass_spec.log2FoldChange = vcp_vs_ctrl_ratio, massspec_ir_direction) %>% write.csv(., "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/irlib/results/ac_cyt_vcp_vs_ctrl.mass_spec_results.csv")
-```
-
-
