@@ -142,6 +142,7 @@ ac_bar_a1_ma <- ma_plot_irfinder(data = ac_bar_a1_vs_a0, labels_list = astrocyte
   annotate("text", x = 3.9, y = 0.3, label = "IR Up", colour = "dodgerblue", size = 3) +   annotate("text", x = 3.9, y = -0.3, label = "IR Down", colour = "firebrick2", size = 3)
 ac_bar_a1_ma
 
+# Absolute IR characterisitics
 VCP.ctrl.filt <- ac_who_ctrl.IR %>% dplyr::select(Name.Coords, coords, ensID, gene_name, Chr, Start, End, Strand, gc_content, intron_length, IRratio, reliable, VCP.ctrl.retained = retained) %>% filter(reliable == "reliable")
 VCP.mutant.filt <- ac_who_vcp.IR %>% dplyr::select(Name.Coords, coords, ensID, gene_name, Chr, Start, End, Strand, IRratio,reliable, VCP.mutant.retained = retained, gc_content, intron_length) %>% filter(reliable == "reliable") 
 SOD1.ctrl.filt <- ac_tyz_ctrl.IR %>% dplyr::select(Name.Coords, coords, ensID, gene_name, Chr, Start, End, Strand,IRratio,reliable, SOD1.ctrl.retained = retained, gc_content, intron_length)  %>% filter(reliable == "reliable")
@@ -981,7 +982,130 @@ track_viewer_tx(gene_test = "COL7A1", txt = ac_who_vcp_vs_ctrl, mut.bam = ac_who
 track_viewer_tx(gene_test = "TGFB1I1", txt = ac_who_vcp_vs_ctrl, mut.bam = ac_who_vcp.bam, ctrl.bam = ac_who_ctrl.bam, xpad = 1000)
 track_viewer_tx(gene_test = "MCAM", txt = ac_who_vcp_vs_ctrl, mut.bam = ac_who_vcp.bam, ctrl.bam = ac_who_ctrl.bam, xpad = 1000)
 
-# qPCR validation of IR events
+# qPCR validation of IR events using Delta CT method to calculate fold change of intron over exon expression
+
+### IRX2
+irx2_ct <- readxl::read_xls("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/sample-details/irx2_qpcr.xls", sheet = "CT_values") #%>% mutate(mutation = str_split_fixed(condition, "_", 2)[,1], feature = str_split_fixed(condition, "_", 2)[,2]) 
+irx2_ct.df <- irx2_ct %>% select(IRX2_intron,IRX2_exon) %>% as.data.frame() 
+group_var <- irx2_ct %>% pull(condition)
+irx2_qpcr <- pcr_analyze(irx2_ct.df,
+            group_var = group_var,
+            reference_gene = "IRX2_exon", # control gene
+            reference_group = "ctrl") # ,plot = TRUE) # control group
+irx2_qpcr
+irx2_intron_expression <- ggplot(data=irx2_qpcr, aes(x=group, y=relative_expression, fill=group)) + geom_bar(stat="identity", width=0.8, color = "black", position=position_dodge()) + 
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position=position_dodge(.9)) +
+  theme_classic() + theme(legend.position="none", axis.text=element_text(size=10)) +
+  #facet_grid(. ~ mutation) + 
+  scale_fill_manual(values=c("white", "black")) +  xlab("") + ylab( expression(fold~change~normalised~intron~expression)  )
+irx2_intron_expression
+
+
+# Spliced transcript expression
+irx2_ct <- readxl::read_xls("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/sample-details/irx2_qpcr.xls", sheet = "CT_values") #%>% mutate(mutation = str_split_fixed(condition, "_", 2)[,1], feature = str_split_fixed(condition, "_", 2)[,2]) 
+irx2_ct.df <- irx2_ct %>% select(IRX2_constitutive, GAPDH) %>% as.data.frame() 
+group_var <- irx2_ct %>% pull(condition)
+irx2_qpcr <- pcr_analyze(irx2_ct.df,
+            group_var = group_var,
+            reference_gene = "GAPDH", # control gene
+            reference_group = "ctrl") # ,plot = TRUE) # control group
+irx2_qpcr
+irx2_spliced_transcript <- ggplot(data=irx2_qpcr, aes(x=group, y=relative_expression, fill=group)) + geom_bar(stat="identity", width=0.8, color = "black", position=position_dodge()) + 
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position=position_dodge(.9)) +
+  theme_classic() + theme(legend.position="none", axis.text=element_text(size=10)) +
+  #facet_grid(. ~ mutation) + 
+  scale_fill_manual(values=c("white", "black")) +  xlab("") + ylab( expression(fold~change~spliced~transcript~expression)  )
+irx2_spliced_transcript
+
+ggarrange(irx2_intron_expression, irx2_spliced_transcript)
+
+
+
+
+
+
+# irx2_ct.df <- irx2_ct %>% mutate(mutation = str_split_fixed(condition, "_", 2)[,1], feature = str_split_fixed(condition, "_", 2)[,2])  %>% as.data.frame() %>% select(IRX2, GAPDH, condition, mutation, feature)
+irx2_ct.df <- irx2_ct %>% as.data.frame() %>% select(IRX2, GAPDH)
+
+group_var <- irx2_ct %>% mutate(feature = str_split_fixed(condition, "_", 2)[,2]) %>% pull(feature)
+
+
+
+irx2_qpcr <- pcr_analyze(irx2_ct.df,
+            group_var = group_var,
+            # reference_gene = "GAPDH", # control gene
+            reference_group = "exon",
+            method = 'delta_ct') # ,plot = TRUE) # control group
+irx2 <- irx2_qpcr %>% select(relative_expression, mutation, feature)
+  pivot_wider(names_from = feature, values_from = relative_expression) %>% mutate(fold_change = intron / exon)
+irx2_plot <- ggplot(data=irx2, aes(x=mutation, y=fold_change, fill=mutation)) + geom_bar(stat="identity", width=0.8, color = "black", position=position_dodge()) + 
+  # geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position=position_dodge(.9)) + 
+  theme_classic() + theme(legend.position="none", axis.text=element_text(size=10)) +
+  #facet_grid(. ~ mutation) + 
+  scale_fill_manual(values=c("white", "black")) +  xlab("") + ylab( expression(fold~change~intron/exon)  )
+irx2_plot
+
+
+irx2_test <- irx2 %>% dplyr::select(relative_expression, feature) %>% t_test(relative_expression ~ feature, var.equal = TRUE) %>% add_significance() %>% mutate(y.position = 4.2)
+irx2_plot <- ggplot(data=irx2, aes(x=feature, y=relative_expression, fill=feature)) + geom_bar(stat="identity", width=0.8, color = "black", position=position_dodge()) + 
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position=position_dodge(.9)) + theme_classic() + theme(legend.position="none", axis.text=element_text(size=10)) +
+  facet_grid(. ~ mutation) + scale_fill_manual(values=c("white", "black")) +  xlab("") + ylab( expression(IRX2)  )
+irx2_plot
+
+
+
+qpcr_ct <- readxl::read_xlsx("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/sample-details/fractionation_qc_qpcr_raw_data_hamish.xlsx", sheet = "CT_values")
+qpcr_ct.df <- qpcr_ct %>% dplyr::select("GAPDH Exon", "GAPDH Intron", "Malat1", "NEAT", "ref_gene") %>% as.data.frame()
+group_var <- qpcr_ct %>% pull(fraction)
+qpcr_ct.fractions <- qpcr_ct %>% filter(fraction != "Whole")
+qpcr_ct.df <- qpcr_ct.fractions %>% dplyr::select("GAPDH Exon","ref_gene") %>% as.data.frame()
+group_var <- qpcr_ct.fractions %>% pull(mutation_fraction)
+# nuclear reference for cytoplasmic markers
+res_cytoplasmic_markers <- pcr_analyze(qpcr_ct.df,
+                   group_var = group_var,
+                   reference_gene = "ref_gene", # control gene
+                   reference_group = "ctrl_nuclear")# ,plot = TRUE) # control group
+# cytoplasmic reference for nuclear markers
+qpcr_ct.fractions <- qpcr_ct %>% filter(fraction != "Whole")
+qpcr_ct.df <- qpcr_ct.fractions %>% dplyr::select("GAPDH Intron","Malat1", "NEAT","ref_gene") %>% as.data.frame()
+group_var <- qpcr_ct.fractions %>% pull(mutation_fraction)
+res_nuclear_markers <- pcr_analyze(qpcr_ct.df,
+                   group_var = group_var,
+                   reference_gene = "ref_gene", # control gene
+                   reference_group = "ctrl_cytoplasm")#,plot = TRUE) # control group
+GAPDH_Exon <- filter(res_cytoplasmic_markers, gene == "GAPDH Exon") %>% mutate(mutation = str_split_fixed(group, "_", 2)[,1], fraction = str_split_fixed(group, "_", 2)[,2]) 
+GAPDH_Exon$fraction <- gsub("cytoplasm", "cyto", GAPDH_Exon$fraction)
+GAPDH_Exon_test <- GAPDH_Exon %>% dplyr::select(relative_expression, fraction) %>% t_test(relative_expression ~ fraction, var.equal = TRUE) %>% add_significance() %>% mutate(y.position = 4.2)
+GAPDH_Exon_plot <- ggplot(data=GAPDH_Exon, aes(x=fraction, y=relative_expression, fill=fraction)) + geom_bar(stat="identity", width=0.8, color = "black", position=position_dodge()) + 
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position=position_dodge(.9)) + theme_classic() + theme(legend.position="none", axis.text=element_text(size=8)) +
+  facet_grid(. ~ mutation) + scale_fill_manual(values=c("white", "black")) +  xlab("") + ylab( expression(GAPDH~Exon)  )
+GAPDH_Intron <- filter(res_nuclear_markers, gene == "GAPDH Intron") %>% mutate(mutation = str_split_fixed(group, "_", 2)[,1],fraction = str_split_fixed(group, "_", 2)[,2]) 
+GAPDH_Intron$fraction <- gsub("cytoplasm", "cyto", GAPDH_Intron$fraction)
+GAPDH_Intron_test <- GAPDH_Intron %>% dplyr::select(relative_expression, fraction) %>% t_test(relative_expression ~ fraction, var.equal = TRUE) %>% add_significance() %>% mutate(y.position = 4.2)
+GAPDH_Intron_plot <- ggplot(data=GAPDH_Intron, aes(x=fraction, y=relative_expression, fill=fraction)) + geom_bar(stat="identity", width=0.8, color = "black", position=position_dodge()) + 
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position=position_dodge(.9)) + theme_classic() + theme(legend.position="none", axis.text=element_text(size=8)) +
+  facet_grid(. ~ mutation) +
+  scale_fill_manual(values=c("white", "black")) +  xlab("") + ylab( expression(GAPDH~Intron))  #+ stat_pvalue_manual(GAPDH_Intron_test, label = "p.signif", tip.length = 0.01)
+Malat1 <- filter(res_nuclear_markers, gene == "Malat1") %>% mutate(mutation = str_split_fixed(group, "_", 2)[,1],fraction = str_split_fixed(group, "_", 2)[,2]) 
+Malat1$fraction <- gsub("cytoplasm", "cyto", Malat1$fraction)
+Malat1_test <- Malat1 %>% dplyr::select(relative_expression, fraction) %>% t_test(relative_expression ~ fraction, var.equal = TRUE) %>% add_significance() %>% mutate(y.position = 4.2)
+Malat1_plot <- ggplot(data=Malat1, aes(x=fraction, y=relative_expression, fill=fraction)) + geom_bar(stat="identity", width=0.8, color = "black", position=position_dodge()) + 
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position=position_dodge(.9)) + theme_classic() + theme(legend.position="none", axis.text=element_text(size=8)) +
+  facet_grid(. ~ mutation) +
+  scale_fill_manual(values=c("white", "black")) +  xlab("") + ylab( expression(Malat1)) #+ stat_pvalue_manual(Malat1_test, label = "p.signif", tip.length = 0.01)
+NEAT <- filter(res_nuclear_markers, gene == "NEAT") %>% mutate(mutation = str_split_fixed(group, "_", 2)[,1],fraction = str_split_fixed(group, "_", 2)[,2]) 
+NEAT$fraction <- gsub("cytoplasm", "cyto", NEAT$fraction)
+NEAT_test <- NEAT %>% dplyr::select(relative_expression, fraction) %>% t_test(relative_expression ~ fraction, var.equal = TRUE) %>% add_significance() %>% mutate(y.position = 4.2)
+NEAT_plot <- ggplot(data=NEAT, aes(x=fraction, y=relative_expression, fill=fraction)) + geom_bar(stat="identity", width=0.8, color = "black", position=position_dodge()) + 
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=.2, position=position_dodge(.9)) + theme_classic() + theme(legend.position="none", axis.text=element_text(size=8)) +
+  facet_grid(. ~ mutation) +
+  scale_fill_manual(values=c("white", "black")) +  xlab("") + ylab( expression(NEAT)) #+ stat_pvalue_manual(NEAT_test, label = "p.signif", tip.length = 0.01)
+
+
+
+
+
+
 
 # SOD1 TRAP-Seq GO terms up & downregulated
 DGEevents.ensID <- dge_res_ac_mou_sod1_vs_ctrl %>% filter(padj < 0.05) %>% mutate(direction = case_when(log2FoldChange > 0 ~ "translation up", log2FoldChange < 0 ~ "translation down", TRUE ~ "no_change")) %>% split(.$direction) %>%  map("ensID")
@@ -1468,11 +1592,35 @@ ac_cyt_vcp_vs_ctrl$phast_cons <- gscores(phast, gr_introns)$default # takes ~1mi
 cytoplasmic <- ac_cyt_vcp_vs_ctrl %>% dplyr::select(Intron.GeneName.GeneID.Coords, coords, intron_length, gc_content, reliable_retained, retained,p0.05_reliable, p0.05_reliable_IRdirection, phast_cons) %>% dplyr::mutate(fraction = "cytoplasmic")
 nuc_cyt <- bind_rows(nuclear, cytoplasmic)
 
+
+VCP.nuc.ctrl.filt <- ac_nuc_ctrl.IR %>% dplyr::select(Name.Coords, coords, ensID, gene_name, Chr, Start, End, Strand, gc_content, intron_length, reliable, ctrl_retained = retained) %>% filter(reliable == "reliable") %>% dplyr::mutate(fraction = "nuclear")
+VCP.nuc.mutant.filt <- ac_nuc_vcp.IR %>% dplyr::select(Name.Coords, coords, ensID, gene_name, Chr, Start, End, Strand, reliable, vcp_retained = retained, gc_content, intron_length) %>% filter(reliable == "reliable") %>% dplyr::mutate(fraction = "nuclear")
+absolute.nuclear <- VCP.nuc.ctrl.filt %>% full_join(VCP.nuc.mutant.filt, by = c("Name.Coords", "coords", "ensID", "gene_name", "Chr", "Start", "End", "Strand", "gc_content", "intron_length", "fraction"))  %>% 
+  mutate(retained = case_when(ctrl_retained == "retained" | vcp_retained == "retained" ~ "retained", TRUE ~ "spliced"))
+VCP.cyt.ctrl.filt <- ac_cyt_ctrl.IR %>% dplyr::select(Name.Coords, coords, ensID, gene_name, Chr, Start, End, Strand, gc_content, intron_length, reliable, ctrl_retained = retained) %>% filter(reliable == "reliable") %>% dplyr::mutate(fraction = "cytoplasmic")
+VCP.cyt.mutant.filt <- ac_cyt_vcp.IR %>% dplyr::select(Name.Coords, coords, ensID, gene_name, Chr, Start, End, Strand, reliable, vcp_retained = retained, gc_content, intron_length) %>% filter(reliable == "reliable") %>% dplyr::mutate(fraction = "cytoplasmic")
+absolute.cytoplasmic <- VCP.cyt.ctrl.filt %>% full_join(VCP.cyt.mutant.filt, by = c("Name.Coords", "coords", "ensID", "gene_name", "Chr", "Start", "End", "Strand", "gc_content", "intron_length", "fraction"))  %>% 
+  mutate(retained = case_when(ctrl_retained == "retained" | vcp_retained == "retained" ~ "retained", TRUE ~ "spliced"))
+absolute.nuc_cyt <- bind_rows(absolute.nuclear, absolute.cytoplasmic)
+gr_introns <- as.GenomicRange(absolute.nuc_cyt$Name.Coords)
+seqlevelsStyle(gr_introns) <- "UCSC"
+absolute.nuc_cyt$phast_cons <- gscores(phast, gr_introns)$default # takes ~1min - too slow to add to function
+
+# Absolute IR characteristics
+VCP.nuc.ctrl.filt <- ac_nuc_ctrl.IR %>% dplyr::select(Name.Coords, coords, ensID, gene_name, Chr, Start, End, Strand, gc_content, intron_length, IRratio, reliable, VCP.nuc.ctrl.retained = retained) %>% filter(reliable == "reliable")
+VCP.nuc.mutant.filt <- ac_nuc_vcp.IR %>% dplyr::select(Name.Coords, coords, ensID, gene_name, Chr, Start, End, Strand, IRratio,reliable, VCP.nuc.mutant.retained = retained, gc_content, intron_length) %>% filter(reliable == "reliable") 
+VCP.cyt.ctrl.filt <- ac_cyt_ctrl.IR %>% dplyr::select(Name.Coords, coords, ensID, gene_name, Chr, Start, End, Strand, gc_content, intron_length, IRratio, reliable, VCP.cyt.ctrl.retained = retained) %>% filter(reliable == "reliable")
+VCP.cyt.mutant.filt <- ac_cyt_vcp.IR %>% dplyr::select(Name.Coords, coords, ensID, gene_name, Chr, Start, End, Strand, IRratio,reliable, VCP.cyt.mutant.retained = retained, gc_content, intron_length) %>% filter(reliable == "reliable") 
+ctrl.vcp.nuc.cyt.IR <- VCP.nuc.ctrl.filt %>% full_join(VCP.nuc.mutant.filt, by = c("Name.Coords", "coords", "ensID", "gene_name", "Chr", "Start", "End", "Strand", "gc_content", "intron_length")) %>%
+  full_join(VCP.cyt.ctrl.filt, by = c("Name.Coords", "coords", "ensID", "gene_name", "Chr", "Start", "End", "Strand", "gc_content", "intron_length")) %>%
+  full_join(VCP.cyt.mutant.filt, by = c("Name.Coords", "coords", "ensID", "gene_name", "Chr", "Start", "End", "Strand", "gc_content", "intron_length")) %>% 
+  mutate(retained = case_when(VCP.nuc.ctrl.filt == "retained" | VCP.nuc.mutant.filt == "retained" | SOD1.ctrl.retained == "retained" | SOD1.mutant.retained == "retained" | C9ORF72.ctrl.retained == "retained" | C9ORF72.mutant.retained == "retained" | A1.ctrl.retained == "retained" | A1.mutant.retained == "retained" ~ "retained", TRUE ~ "spliced"))
+
 # GC Content in Fractions -------------------
 # Cytoplasmic vs nuclear retained introns
-gc.retained_spliced.nuc_cyt.sina_plot <- ggplot(nuc_cyt, aes(x = reliable_retained, y= gc_content, color = reliable_retained)) + 
-      geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = nuc_cyt, aes(fill = reliable_retained), colour = "black", width=0.2, outlier.shape = NA) +
-      scale_colour_manual(values = get_palette("npg",4)) + scale_fill_manual(values = get_palette("npg",4)) +  
+gc.retained_spliced.nuc_cyt.sina_plot <- ggplot(absolute.nuc_cyt, aes(x = retained, y= gc_content, color = retained)) + 
+      geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = absolute.nuc_cyt, aes(fill = retained), colour = "black", width=0.2, outlier.shape = NA) +
+      scale_colour_manual(values = c("firebrick2", "dodgerblue3")) + scale_fill_manual(values = c("firebrick2", "dodgerblue3")) +  
       theme_classic() + theme(legend.position = "none", axis.text=element_text(size=12)) +
       geom_hline(yintercept = 0.5, linetype = 2) + facet_wrap(. ~ fraction) +
       stat_compare_means(comparisons = list(c("retained", "spliced")), label = "p.signif") + ylab(label = expression(mean~GC~content) ) + xlab("")
@@ -1481,7 +1629,7 @@ gc.retained_spliced.nuc_cyt.sina_plot
 # IR up vs IR down in fractions
 gc.IRup_IRdown.nuc_cyt.sina_plot <- ggplot(dplyr::filter(nuc_cyt, p0.05_reliable == "significant"), aes(x = p0.05_reliable_IRdirection, y= gc_content, color = p0.05_reliable_IRdirection)) + 
       geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = dplyr::filter(nuc_cyt, p0.05_reliable == "significant"), aes(fill = p0.05_reliable_IRdirection), colour = "black", width=0.2, outlier.shape = NA) +
-      scale_colour_manual(values = get_palette("npg",4)) + scale_fill_manual(values = get_palette("npg",4)) +  
+      scale_colour_manual(values = c("firebrick2", "dodgerblue3")) + scale_fill_manual(values = c("firebrick2", "dodgerblue3")) +  
       theme_classic() + theme(legend.position = "none", axis.text=element_text(size=12)) +
       geom_hline(yintercept = 0.5, linetype = 2) + facet_wrap(. ~ fraction)+
       stat_compare_means(comparisons = list(c("IR down", "IR up")), label = "p.signif") + ylab(label = expression(mean~GC~content) ) + xlab("")
@@ -1490,9 +1638,9 @@ gc.IRup_IRdown.nuc_cyt.sina_plot
  
 # Intron lengths in fractions -------------------------------
 # Cytoplasmic vs nuclear retained introns
-intron_length.retained_spliced.nuc_cyt.sina_plot <- ggplot(nuc_cyt, aes(x = reliable_retained, y= intron_length, color = reliable_retained)) + 
-      geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = nuc_cyt, aes(fill = reliable_retained), colour = "black", width=0.2, outlier.shape = NA) +
-      scale_colour_manual(values = get_palette("npg",4)) + scale_fill_manual(values = get_palette("npg",4)) +  
+intron_length.retained_spliced.nuc_cyt.sina_plot <- ggplot(absolute.nuc_cyt, aes(x = retained, y= intron_length, color = retained)) + 
+      geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = absolute.nuc_cyt, aes(fill = retained), colour = "black", width=0.2, outlier.shape = NA) +
+      scale_colour_manual(values = c("firebrick2", "dodgerblue3")) + scale_fill_manual(values = c("firebrick2", "dodgerblue3")) +  
       theme_classic() + theme(legend.position = "none", axis.text=element_text(size=12)) +
       facet_wrap(. ~ fraction) +
       stat_compare_means(comparisons = list(c("retained", "spliced")), label = "p.signif") + ylab(label = expression(log[10]~mean~intron~length) ) + xlab("") +  scale_y_log10() 
@@ -1501,7 +1649,7 @@ intron_length.retained_spliced.nuc_cyt.sina_plot
 # IR up vs IR down in fractions
 intron_length.IRup_IRdown.nuc_cyt.sina_plot <- ggplot(dplyr::filter(nuc_cyt, p0.05_reliable == "significant"), aes(x = p0.05_reliable_IRdirection, y= intron_length, color = p0.05_reliable_IRdirection)) + 
       geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = dplyr::filter(nuc_cyt, p0.05_reliable == "significant"), aes(fill = p0.05_reliable_IRdirection), colour = "black", width=0.2, outlier.shape = NA) +
-      scale_colour_manual(values = get_palette("npg",4)) + scale_fill_manual(values = get_palette("npg",4)) +  
+      scale_colour_manual(values = c("firebrick2", "dodgerblue3")) + scale_fill_manual(values = c("firebrick2", "dodgerblue3")) +  
       theme_classic() + theme(legend.position = "none", axis.text=element_text(size=12)) +
       facet_wrap(. ~ fraction)+
       stat_compare_means(comparisons = list(c("IR down", "IR up")), label = "p.signif") + ylab(label = expression(log[10]~mean~intron~length) ) + xlab("") +  scale_y_log10() 
@@ -1510,9 +1658,9 @@ intron_length.IRup_IRdown.nuc_cyt.sina_plot
 
 # PhastCons Score: conservation score -------------------------------
 # Cytoplasmic vs nuclear retained introns
-PhastCons.retained_spliced.nuc_cyt.sina_plot <- ggplot(nuc_cyt, aes(x = reliable_retained, y= phast_cons, color = reliable_retained)) + 
-      geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = nuc_cyt, aes(fill = reliable_retained), colour = "black", width=0.2, outlier.shape = NA) +
-      scale_colour_manual(values = get_palette("npg",4)) + scale_fill_manual(values = get_palette("npg",4)) +  
+PhastCons.retained_spliced.nuc_cyt.sina_plot <- ggplot(absolute.nuc_cyt, aes(x = retained, y= phast_cons, color = retained)) + 
+      geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = absolute.nuc_cyt, aes(fill = retained), colour = "black", width=0.2, outlier.shape = NA) +
+      scale_colour_manual(values = c("firebrick2", "dodgerblue3")) + scale_fill_manual(values = c("firebrick2", "dodgerblue3")) +  
       theme_classic() + theme(legend.position = "none", axis.text=element_text(size=12)) +
       facet_wrap(. ~ fraction) +
       stat_compare_means(comparisons = list(c("retained", "spliced")), label = "p.signif") + ylab(label = expression(log[10]~mean~phast~conservation~score) ) + xlab("") +  scale_y_log10() 
@@ -1521,11 +1669,99 @@ PhastCons.retained_spliced.nuc_cyt.sina_plot
 # IR up vs IR down in fractions
 PhastCons.IRup_IRdown.nuc_cyt.sina_plot <- ggplot(dplyr::filter(nuc_cyt, p0.05_reliable == "significant"), aes(x = p0.05_reliable_IRdirection, y= phast_cons, color = p0.05_reliable_IRdirection)) + 
       geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = dplyr::filter(nuc_cyt, p0.05_reliable == "significant"), aes(fill = p0.05_reliable_IRdirection), colour = "black", width=0.2, outlier.shape = NA) +
-      scale_colour_manual(values = get_palette("npg",4)) + scale_fill_manual(values = get_palette("npg",4)) +  
+      scale_colour_manual(values = c("firebrick2", "dodgerblue3")) + scale_fill_manual(values = c("firebrick2", "dodgerblue3")) +  
       theme_classic() + theme(legend.position = "none", axis.text=element_text(size=12)) +
       facet_wrap(. ~ fraction)+
       stat_compare_means(comparisons = list(c("IR down", "IR up")), label = "p.signif") + ylab(label = expression(log[10]~mean~phast~conservation~score) ) + xlab("") +  scale_y_log10() 
 PhastCons.IRup_IRdown.nuc_cyt.sina_plot
+
+
+# iCLIP xlinks score -------------------------------
+
+### absolute IR iCLIP
+grange_introns <- as.GenomicRange(absolute.nuc_cyt$Name.Coords) # create GRanges for each intron (both retained and non retained)
+intron_coords <- tibble(intron = 1:length(absolute.nuc_cyt$coords), coords = absolute.nuc_cyt$coords) # intron coordinates for to enable matching back to original coords in IRFinder dataframe
+## sum the iclip xlink scores for each RBP in HepG2 in a for loop
+clip_hepg2 <- list.files("/camp/home/ziffo/home/genomes/clip-bedgraphs/HepG2/")
+clip_hepg2 <- clip_hepg2[!grepl("3nt_peaks",clip_hepg2)] # only assess raw crosslink files without any peak calling for enrichment
+coverage_list_nuc <- list()
+for (i in seq_along(clip_hepg2)) {
+  print(clip_hepg2[[i]])
+  rbp <- str_remove(clip_hepg2[[i]], ".merged.bed.gz")
+  bed <- import(paste("/camp/home/ziffo/home/genomes/clip-bedgraphs/HepG2/", clip_hepg2[[i]],sep=""))
+  seqlevelsStyle(bed) <- "NCBI" # remove "chr"
+  grange_overlap <- findOverlaps(query = grange_introns, subject=bed, ignore.strand=FALSE) # find overlaps between RBP binding sites & retained introns
+  range <- bed[ queryHits(grange_overlap) ] %>% as.data.frame() # subset iCLIP xlinks that overlap with the introns - 50,287 rows each with a xlinks score. There are 8739 introns - many introns have multiple scores.
+  coverage_list_nuc[[i]] <- range %>%  mutate( intron = queryHits(grange_overlap)) %>%  group_by(intron) %>% summarise(iclip_score = sum(score) ) # sum the scores for each intron - 4266 introns with scores, remaining introns have 0 scores
+  coverage_list_nuc[[i]]$iclip_score[is.na(coverage_list_nuc[[i]]$iclip_score)]<-0 # set NA scores to 0
+  coverage_list_nuc[[i]] <- coverage_list_nuc[[i]] %>% left_join(intron_coords, by = "intron") # add intron coordinates to match back to IRFinder results
+  names(coverage_list_nuc)[i] <- rbp
+}
+saveRDS(coverage_list_nuc, "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/ac_absolute.nuc_cyt.vcp_vs_ctrl.coverage_list_nuc.RDS")
+
+coverage_list_df <- bind_rows(coverage_list_nuc, .id = "RBP") # collapse list of dataframes into a single df
+# iclip_scores <- coverage_list_df %>%  group_by(RBP) %>%  mutate(row = row_number()) %>%
+#   tidyr::pivot_wider(names_from = intron, values_from = iclip_score, values_fill = 0) %>% select(-row) # each column becomes an RBP. Each row is an intron - there are 7815 in IRFinder but only 7620 have xlink scores.
+iclip_scores <- pivot_wider(coverage_list_df, names_from = RBP, values_from = iclip_score, values_fill = 0) # 18,584 coords
+iclip_scores[is.na(iclip_scores)] <- 0  # set NA scores to 0
+absolute.nuc_cyt.unique.coords <- absolute.nuc_cyt %>% distinct(coords, .keep_all = TRUE)
+iclip_scores$intron_length <- absolute.nuc_cyt.unique.coords$intron_length[iclip_scores$coords %in% absolute.nuc_cyt.unique.coords$coords]
+iclip_scores_normalised <- iclip_scores %>% select(-intron) %>% mutate_if(is.numeric, ~ (./intron_length)) %>% dplyr::select(-intron_length) # normalise all scores for intron_length
+iclip_scores_normalised$sum <- iclip_scores_normalised %>% select_if(is.numeric) %>% rowSums # sum all normalised RBP scores for each intron
+saveRDS(iclip_scores_normalised, "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/ac_absolute.nuc_cyt.vcp_vs_ctrl.CLIPscores")
+
+iclip_scores_normalised <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/ac_absolute.nuc_cyt.vcp_vs_ctrl.CLIPscores")
+iclip_scores_normalised.filt <- iclip_scores_normalised %>% select(coords, "iclip_enrichment" = sum)
+iclip_scores_normalised.filt <- aggregate(iclip_scores_normalised.filt$iclip_enrichment, list(coords = iclip_scores_normalised.filt$coords), FUN = mean) %>% drop_na
+absolute.nuc_cyt$iclip_enrichment <- iclip_scores_normalised.filt$x[match(absolute.nuc_cyt$coords,iclip_scores_normalised.filt$coords)];
+# set NA to 0
+absolute.nuc_cyt$iclip_enrichment[is.na(absolute.nuc_cyt$iclip_enrichment)] <- 0  # set NA scores to 0
+
+# Cytoplasmic vs nuclear retained introns
+CLIP.retained_spliced.sina_plot <- ggplot(absolute.nuc_cyt, aes(x = retained, y= iclip_enrichment, color = retained)) + 
+      geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = absolute.nuc_cyt, aes(fill = retained), colour = "black", width=0.2, outlier.shape = NA) +
+      scale_colour_manual(values = c("firebrick2", "dodgerblue3")) + scale_fill_manual(values = c("firebrick2", "dodgerblue3")) +  
+      theme_classic() + theme(legend.position = "none", axis.text=element_text(size=12)) +
+      facet_wrap(. ~ fraction) +
+      stat_compare_means(comparisons = list(c("retained", "spliced")), label = "p.signif") + ylab(label = expression(log[10]~normalised~iCLIP~xlinks~score~sum) ) + xlab("") +  scale_y_log10() 
+CLIP.retained_spliced.sina_plot
+
+
+# differential IR iCLIP
+nuclear <- ac_nuc_vcp_vs_ctrl %>% dplyr::select(Intron.GeneName.GeneID.Coords, coords, intron_length, gc_content, reliable_retained, retained, p0.05_reliable, p0.05_reliable_IRdirection) %>% 
+  dplyr::mutate(fraction = "nuclear")
+cytoplasmic <- ac_cyt_vcp_vs_ctrl %>% dplyr::select(Intron.GeneName.GeneID.Coords, coords, intron_length, gc_content, reliable_retained, retained,p0.05_reliable, p0.05_reliable_IRdirection) %>% 
+  dplyr::mutate(fraction = "cytoplasmic")
+nuc_cyt <- bind_rows(nuclear, cytoplasmic)
+grange_introns <- as.GenomicRange(nuc_cyt$Intron.GeneName.GeneID.Coords) # create GRanges for each intron (both retained and non retained)
+intron_coords <- tibble(intron = 1:length(nuc_cyt$coords), coords = nuc_cyt$coords) # intron coordinates for to enable matching back to original coords in IRFinder dataframe
+## sum the iclip xlink scores for each RBP in HepG2 in a for loop
+clip_hepg2 <- list.files("/camp/home/ziffo/home/genomes/clip-bedgraphs/HepG2/")
+clip_hepg2 <- clip_hepg2[!grepl("3nt_peaks",clip_hepg2)] # only assess raw crosslink files without any peak calling for enrichment
+coverage_list_nuc <- list()
+for (i in seq_along(clip_hepg2)) {
+  print(clip_hepg2[[i]])
+  rbp <- str_remove(clip_hepg2[[i]], ".merged.bed.gz")
+  bed <- import(paste("/camp/home/ziffo/home/genomes/clip-bedgraphs/HepG2/", clip_hepg2[[i]],sep=""))
+  seqlevelsStyle(bed) <- "NCBI" # remove "chr"
+  grange_overlap <- findOverlaps(query = grange_introns, subject=bed, ignore.strand=FALSE) # find overlaps between RBP binding sites & retained introns
+  range <- bed[ queryHits(grange_overlap) ] %>% as.data.frame() # subset iCLIP xlinks that overlap with the introns - 50,287 rows each with a xlinks score. There are 8739 introns - many introns have multiple scores.
+  coverage_list_nuc[[i]] <- range %>%  mutate( intron = queryHits(grange_overlap)) %>%  group_by(intron) %>% summarise(iclip_score = sum(score) ) # sum the scores for each intron - 4266 introns with scores, remaining introns have 0 scores
+  coverage_list_nuc[[i]]$iclip_score[is.na(coverage_list_nuc[[i]]$iclip_score)]<-0 # set NA scores to 0
+  coverage_list_nuc[[i]] <- coverage_list_nuc[[i]] %>% left_join(intron_coords, by = "intron") # add intron coordinates to match back to IRFinder results
+  names(coverage_list_nuc)[i] <- rbp
+}
+# saveRDS(coverage_list_nuc, "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/ac_nuc_cyt.vcp_vs_ctrl.coverage_list_nuc.RDS")
+coverage_list_df <- bind_rows(coverage_list_nuc, .id = "RBP") # collapse list of dataframes into a single df
+# iclip_scores <- coverage_list_df %>%  group_by(RBP) %>%  mutate(row = row_number()) %>%
+#   tidyr::pivot_wider(names_from = intron, values_from = iclip_score, values_fill = 0) %>% select(-row) # each column becomes an RBP. Each row is an intron - there are 7815 in IRFinder but only 7620 have xlink scores.
+iclip_scores <- pivot_wider(coverage_list_df, names_from = RBP, values_from = iclip_score, values_fill = 0) # 18,584 coords
+iclip_scores[is.na(iclip_scores)] <- 0  # set NA scores to 0
+nuc_cyt.unique.coords <- nuc_cyt %>% distinct(coords, .keep_all = TRUE)
+iclip_scores$intron_length <- nuc_cyt.unique.coords$intron_length[iclip_scores$coords %in% nuc_cyt.unique.coords$coords]
+iclip_scores_normalised <- iclip_scores %>% select(-intron) %>% mutate_if(is.numeric, ~ (./intron_length)) %>% dplyr::select(-intron_length) # normalise all scores for intron_length
+iclip_scores_normalised$sum <- iclip_scores_normalised %>% select_if(is.numeric) %>% rowSums # sum all normalised RBP scores for each intron
+saveRDS(iclip_scores_normalised, "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/ac_nuc_cyt.vcp_vs_ctrl.CLIPscores")
 
 iclip_scores_normalised <- readRDS("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/splicing/IRFinder/ac_nuc_cyt.vcp_vs_ctrl.CLIPscores")
 iclip_scores_normalised.filt <- iclip_scores_normalised %>% select(coords, "iclip_enrichment" = sum)
@@ -1534,20 +1770,10 @@ nuc_cyt$iclip_enrichment <- iclip_scores_normalised.filt$x[match(nuc_cyt$coords,
 # set NA to 0
 nuc_cyt$iclip_enrichment[is.na(nuc_cyt$iclip_enrichment)] <- 0  # set NA scores to 0
 
-# iCLIP xlinks score -------------------------------
-# Cytoplasmic vs nuclear retained introns
-CLIP.retained_spliced.sina_plot <- ggplot(nuc_cyt, aes(x = reliable_retained, y= iclip_enrichment, color = reliable_retained)) + 
-      geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = nuc_cyt, aes(fill = reliable_retained), colour = "black", width=0.2, outlier.shape = NA) +
-      scale_colour_manual(values = get_palette("npg",4)) + scale_fill_manual(values = get_palette("npg",4)) +  
-      theme_classic() + theme(legend.position = "none", axis.text=element_text(size=12)) +
-      facet_wrap(. ~ fraction) +
-      stat_compare_means(comparisons = list(c("retained", "spliced")), label = "p.signif") + ylab(label = expression(log[10]~normalised~iCLIP~xlinks~score~sum) ) + xlab("") +  scale_y_log10() 
-CLIP.retained_spliced.sina_plot
-
 # IR up vs IR down in fractions
 CLIP.IRup_IRdown.sina_plot <- ggplot(dplyr::filter(nuc_cyt, p0.05_reliable == "significant"), aes(x = p0.05_reliable_IRdirection, y= iclip_enrichment, color = p0.05_reliable_IRdirection)) + 
       geom_violin() + geom_sina(size = 0.5) + geom_boxplot(data = dplyr::filter(nuc_cyt, p0.05_reliable == "significant"), aes(fill = p0.05_reliable_IRdirection), colour = "black", width=0.2, outlier.shape = NA) +
-      scale_colour_manual(values = get_palette("npg",4)) + scale_fill_manual(values = get_palette("npg",4)) +  
+      scale_colour_manual(values = c("firebrick2", "dodgerblue3")) + scale_fill_manual(values = c("firebrick2", "dodgerblue3")) +  
       theme_classic() + theme(legend.position = "none", axis.text=element_text(size=12)) +
       facet_wrap(. ~ fraction)+
       stat_compare_means(comparisons = list(c("IR down", "IR up")), label = "p.signif") + ylab(label = expression(log[10]~normalised~iCLIP~xlinks~score~sum) ) + xlab("") +  scale_y_log10() 
