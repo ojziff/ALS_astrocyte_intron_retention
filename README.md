@@ -7,11 +7,9 @@ Ziff OJ, Taha D, Crerar H, Clarke B, Chakrabarti A, Kelly G, Ule J, Luscombe NM,
 
 The scripts are written in Rmarkdown documents for readability and are organised according to the Figures in the paper.
 
-Raw data are deposited at [NCBI GEO](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi) under accession number [XXXXXXXXX](LINK%20HERE)
+Raw data are deposited at [NCBI GEO](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi) under accession number [GSE160133](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE160133).
 
-Previously published iPSC derived astrocytes carrying ALS mutations are available at [GSE142730](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE142730) (C9orf72), [GSE102904](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE102904) (SOD1). 
-Cytokine-stimulated iPSC derived astrocytes are available at [syn21861181](https://www.synapse.org/#!Synapse:syn21861181). 
-Mouse SOD1 astrocyte TRAP-seq is available at [GSE74724](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74724).
+Previously published iPSC derived astrocytes carrying ALS mutations are available at [GSE142730](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE142730) (C9orf72), [GSE102902](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE102902) and [GSE99843](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE99843) (SOD1 mutants and control respectively). Cytokine-stimulated iPSC derived astrocytes are available at [syn21861181](https://www.synapse.org/#!Synapse:syn21861181). Mouse SOD1 astrocyte TRAP-seq is available at [GSE74724](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74724).
 
 For each dataset we analyse:
 1. Differential gene expression using HTSeq and DESeq2
