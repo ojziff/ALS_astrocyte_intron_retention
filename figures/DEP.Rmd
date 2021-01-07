@@ -1,0 +1,68 @@
+---
+title: "VCP mutant astrocyte mass spectrometry"
+author: "Oliver Ziff"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_document:
+    fig_width: 7
+    fig_height: 7
+    toc_depth: 3
+    theme: simplex
+    dev: jpeg
+editor_options:
+  chunk_output_type: console
+---
+
+# Import sample details
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(DEP)
+mass_spec_ac <- read.table("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/ac_vcp_fractions_massspec_protein_groups.txt", sep = '\t',header = TRUE) # ProteomeXchange Consortium (http://proteomecentral.proteomexchange.org) via the PRIDE partner repository with the dataset identifier PXD022604.
+```
+
+# Differential testing 
+
+Run as per: https://www.bioconductor.org/packages/release/bioc/vignettes/DEP/inst/doc/DEP.html
+
+```{r}
+colnames(mass_spec_ac)
+mass_spec_ac_cyt <- mass_spec_ac %>% dplyr::select("Protein.IDs", "Protein.names", "Gene.names", "Number.of.proteins","Peptides", "Fasta.headers", "Majority.protein.IDs",  
+                                                   starts_with("LFQ.intensity.C"), "Reverse", "Potential.contaminant", "id", "Peptide.IDs", )
+mass_spec_ac_cyt$Gene.names %>% duplicated() %>% any()
+mass_spec_ac_cyt %>% group_by(Gene.names) %>% dplyr::summarize(frequency = dplyr::n()) %>% arrange(desc(frequency)) %>% filter(frequency > 1) # genes without an annotated genename use the Uniprot ID
+mass_spec_ac_cyt <- make_unique(mass_spec_ac_cyt, "Gene.names", "Protein.IDs", delim = ";")
+mass_spec_ac_cyt$name %>% duplicated() %>% any()
+LFQ_columns <- grep("LFQ.", colnames(mass_spec_ac_cyt)) # get LFQ column numbers
+experimental_design <- data.frame("label" = c("C1_01","C1_02","C1_03","C5_01","C5_02","C5_03","CCbie_01","CCbie_02","CCbie_03", "CGlia_01","CGlia_02","CGlia_03"),
+                       "condition" = c("ctrl","ctrl","ctrl","ctrl","ctrl","ctrl","vcp","vcp","vcp", "vcp","vcp","vcp"),
+                       "replicate"= c("1","2","3","4","5","6","1","2","3","4","5","6"))
+data_se <- make_se(mass_spec_ac_cyt, LFQ_columns, experimental_design) # create summarised experiment - this log2 transforms assay data
+plot_frequency(data_se) # number of proteins quantified in each replicate is very different - missing values need imputing
+data_filt <- filter_missval(data_se, thr = 6) # keep protein if detected in any of 6 replicates of at least one condition
+plot_numbers(data_filt) #  barplot of the number of identified proteins per samples
+plot_coverage(data_filt) # barplot of the protein identification overlap between samples
+data_norm <- normalize_vsn(data_filt) # normalise with VST
+plot_normalization(data_filt, data_norm) # # Visualize normalization by boxplots for all samples before and after normalization
+plot_missval(data_filt) # explore proteins with missing values with heatmap - bias of missing proteins in cytoplasmic samples.
+plot_detect(data_filt) # missing proteins have lower intense proteins and slightly higher densities
+data_imp <- impute(data_norm, fun = "MinProb", q = 0.01) # Impute missing data using random draws from a Gaussian distribution centered around a minimal value (for MNAR)
+data_imp_man <- impute(data_norm, fun = "man", shift = 1.8, scale = 0.3)# Impute missing data using random draws from a manually defined left-shifted Gaussian distribution (for MNAR)
+data_imp_knn <- impute(data_norm, fun = "knn", rowmax = 0.9)# Impute missing data using the k-nearest neighbour approach (for MAR)
+plot_imputation(data_norm, data_imp) # check effect of imputation on distributions
+data_diff <- test_diff(data_imp, type = "control", control = "ctrl") # Differential enrichment analysis - linear models with empirical Bayes, utilises limma. specify the control sample. 
+dep <- add_rejections(data_diff, alpha = 0.05, lfc = 1)
+# PCA
+plot_pca(dep, x = 1, y = 2, n = 500, point_size = 4) 
+# correlation matrix
+plot_cor(dep, significant = FALSE, lower = 0, upper = 1, pal = "Reds") 
+# heatmap of all significant proteins
+plot_heatmap(dep, type = "centered", kmeans = TRUE, k = 6, col_limit = 4, show_row_names = FALSE,indicate = c("condition", "replicate"))
+# Volcano
+plot_volcano(dep, contrast = "vcp_vs_ctrl", label_size = 2, add_names = TRUE, adjusted = FALSE)
+# Generate a results table
+cyt_mass_spec_results <- get_results(dep)
+cyt_mass_spec_results %>% filter(significant) %>% nrow() # 1160 Number of significant proteins
+saveRDS(cyt_mass_spec_results, "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/mass-spectrometry/cytoplasmic_mass_spec_results.RDS")
+```
+
