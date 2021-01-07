@@ -29,7 +29,7 @@ HTSeq was run in intersection-strict mode as follows:
 htseq-count --format bam --order pos --mode intersection-strict --stranded reverse --minaqual 1 --type exon --idattr gene_id $FILE $GTF > $OUT/${SAMPLE}.tab
 ```
 
-DESeq2 was then run as per the DESeq2_analysis.Rmd script (see Figures folder).
+DESeq2 was then run as per the DESeq2_analysis.Rmd script (see figures folder).
 
 IRFinder reference was built as follows:
 ```bash
@@ -45,4 +45,8 @@ IRFinder -r $IRFINDER_REFERENCE -a none -d $OUT/$GROUP $READS
 As we had two replicates we utilised the [audic and claverie test for differential IR](https://github.com/williamritchie/IRFinder/wiki/Small-Amounts-of-Replicates-via-Audic-and-Claverie-Test). We first pooled replicates of the same condition using IRFinder_pool_replicates scripts (see splicing folder). We then measured pooled IR in each condition using the IRFinder_differential script (see splicing folder).
 
 Downstream analysis of DESeq2 and IRFinder outputs were then analysis as per the `figures_and_tables_resubmission.Rmd` script.
+
+Mass spectrometry datasets were analysed with [DEP](https://www.bioconductor.org/packages/release/bioc/vignettes/DEP/inst/doc/DEP.html) as per the DEP.Rmd script (see figures folder).
+
+Schematics were created using [Biorender.com](https://biorender.com/) and merged into figures with Adobe Illustrator.
 
