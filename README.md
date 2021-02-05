@@ -15,8 +15,9 @@ For each dataset we analyse:
 1. QC for raw read, alignment, gene biotype, sample similarity, and strand-specificity checks with [nf-core/rnaseq](https://github.com/nf-core/rnaseq) using the [MultiQC](https://multiqc.info/) html output
 2. Alignment to genome with [STAR](https://github.com/alexdobin/STAR) and indexed with [SAMtools](https://sourceforge.net/projects/samtools/files/samtools/)
 3. Read quantification using [HTSeq](https://htseq.readthedocs.io/en/master/)
-4. Differential gene expression using [DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)
-5. Intron retention using [IRFinder](https://github.com/williamritchie/IRFinder)
+4. Pseudo-alignment to the transcriptome with [Kallisto](https://pachterlab.github.io/kallisto/manual)
+5. Differential expression using [DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)
+6. Intron retention using [IRFinder](https://github.com/williamritchie/IRFinder)
 
 STAR and samtools were run as follows:
 ```bash
