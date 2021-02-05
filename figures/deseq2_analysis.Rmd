@@ -1,0 +1,390 @@
+---
+title: "ALS astrocyte datasets DESeq2"
+author: "Oliver Ziff"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_document:
+    fig_width: 7
+    fig_height: 7
+    toc_depth: 3
+    theme: simplex
+    dev: jpeg
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+source("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/scripts/figures_and_tables_functions_resubmission.R")
+```
+
+# VCP astrocytes
+
+## All samples
+
+```{r}
+# Merge HTSeq counts for raw_gene_count_matrix.txt
+ac_who_ctrl1.tab <- read.delim("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/alignment/htseq/ac_who_ctrl1.tab", header = FALSE) %>% select("featureid" = V1, "whole_ctrl1" = V2)
+ac_who_ctrl5.tab <- read.delim("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/alignment/htseq/ac_who_ctrl5.tab", header = FALSE) %>% select("featureid" = V1, "whole_ctrl5.tab" = V2)
+ac_who_cb1e.tab <- read.delim("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/alignment/htseq/ac_who_cb1e.tab", header = FALSE) %>% select("featureid" = V1, "whole_cb1e.tab" = V2)
+ac_who_glia.tab <- read.delim("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/alignment/htseq/ac_who_glia.tab", header = FALSE) %>% select("featureid" = V1, "whole_glia.tab" = V2)
+ac_nuc_ctrl1.tab <- read.delim("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/alignment/htseq/ac_nuc_ctrl1.tab", header = FALSE) %>% select("featureid" = V1, "nuclear_ctrl1" = V2)
+ac_nuc_ctrl5.tab <- read.delim("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/alignment/htseq/ac_nuc_ctrl5.tab", header = FALSE) %>% select("featureid" = V1, "nuclear_ctrl5.tab" = V2)
+ac_nuc_cb1e.tab <- read.delim("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/alignment/htseq/ac_nuc_cb1e.tab", header = FALSE) %>% select("featureid" = V1, "nuclear_cb1e.tab" = V2)
+ac_nuc_glia.tab <- read.delim("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/alignment/htseq/ac_nuc_glia.tab", header = FALSE) %>% select("featureid" = V1, "nuclear_glia.tab" = V2)
+ac_cyt_ctrl1.tab <- read.delim("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/alignment/htseq/ac_cyt_ctrl1.tab", header = FALSE) %>% select("featureid" = V1, "cytoplasmic_ctrl1" = V2)
+ac_cyt_ctrl5.tab <- read.delim("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/alignment/htseq/ac_cyt_ctrl5.tab", header = FALSE) %>% select("featureid" = V1, "cytoplasmic_ctrl5.tab" = V2)
+ac_cyt_cb1e.tab <- read.delim("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/alignment/htseq/ac_cyt_cb1e.tab", header = FALSE) %>% select("featureid" = V1, "cytoplasmic_cb1e.tab" = V2)
+ac_cyt_glia.tab <- read.delim("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/alignment/htseq/ac_cyt_glia.tab", header = FALSE) %>% select("featureid" = V1, "cytoplasmic_glia.tab" = V2)
+
+astrocyte_htseq_gene_counts <- ac_who_ctrl1.tab %>% full_join(ac_who_ctrl5.tab, by = "featureid") %>% full_join(ac_who_cb1e.tab, by = "featureid") %>% full_join(ac_who_glia.tab, by = "featureid") %>% 
+  full_join(ac_nuc_ctrl1.tab, by = "featureid") %>% full_join(ac_nuc_ctrl5.tab, by = "featureid") %>% full_join(ac_nuc_cb1e.tab, by = "featureid") %>% full_join(ac_nuc_glia.tab, by = "featureid") %>%
+  full_join(ac_cyt_ctrl1.tab, by = "featureid") %>% full_join(ac_cyt_ctrl5.tab, by = "featureid") %>% full_join(ac_cyt_cb1e.tab, by = "featureid") %>% full_join(ac_cyt_glia.tab, by = "featureid")
+write.table(astrocyte_htseq_gene_counts, "/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/alignment/htseq/gene_counts.txt", row.names = FALSE)
+```
+
+## Whole cell VCP vs CTRL
+
+```{r}
+patani <- read.csv("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/sample-details/sample_table.csv")
+patani <- patani[!patani$cellline == "ctrl2",] # remove CTRL2 samples due to batch effects
+patani$cellline <- patani$cellline %>% gsub("ctrl5", "ctrl2", .) # for the paper we rename ctrl5 as ctrl2 to avoid confusion as to why we have ctrl1 & 5 (but not 2,3 and 4)
+patani <- patani %>% distinct(fraction_cellline, .keep_all = TRUE) # remove rows for technical repeats
+patani <- patani %>% mutate(mutation = as.factor(vcp), fraction = factor(fraction, levels = c("whole", "nuclear", "cytoplasmic")))
+patani$condition <- gsub("vcp", "als", patani$mutation)
+patani$condition <- factor(patani$condition, levels = c("ctrl", "als")) # set the reference control first to ensure comparison is ALS vs CTRL (rather than CTRL vs ALS)
+patani$sample <- patani$fraction_cellline %>% gsub("whole", "who", .) %>% gsub("nuclear", "nuc", .) %>% gsub("cytoplasmic", "cyt", .) #%>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .)
+patani$sample <- paste("ac_",patani$sample,sep="")
+patani$patient <- patani$cellline %>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .)
+patani <- patani %>% dplyr::filter(fraction == "whole") # astrocyte whole-cell samples for VCP only
+sampleTable <- patani %>% dplyr::select(sampleName=fraction_cellline, condition, fraction, mutation, cellline, patient, sample) %>% mutate(fileName = paste(sample, ".tab", sep = ""), patient_fraction = paste(patient, fraction, sep = "_")) %>% dplyr::select(sampleName, fileName, condition, everything())
+htseqdir <- "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/alignment/htseq"
+dds <- DESeqDataSetFromHTSeqCount(sampleTable = sampleTable, 
+                                            directory = htseqdir, 
+                                            design = ~ condition) # create DESeqDataSet with this design - Import htseq .tab tables
+dds <- DESeq(dds) # run DESeq2
+resultsNames(dds)
+res <- DESeq2::results(dds, name = "condition_als_vs_ctrl") # Astrocyte ALS vs CTRL
+gene2ens_filtered <-  filter(gene2ens, gene_id %in% rownames(res)) %>% unique # filter gene to ensID to only ENS names in the results tibble
+res <- res %>% as_tibble(rownames = "ensID") %>% left_join(gene2ens_filtered, by=c("ensID"="gene_id")) %>% arrange(padj) # join gene gene_nameS to res tibble & order by padj
+readr::write_csv(res, path=paste("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/deseq_results_ac_who_vcp_vs_ctrl.csv", sep = "")) # save results as CSV
+vsd <- vst(dds, blind=FALSE) # VST transformation
+saveRDS(res, "/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/res_ac_who_vcp_vs_ctrl.RDS")
+saveRDS(dds, "/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/dds_ac_who_vcp_vs_ctrl.RDS")
+saveRDS(vsd, "/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/vsd_ac_who_vcp_vs_ctrl.RDS")
+```
+
+## Nuclear VCP vs CTRL
+
+```{r}
+patani <- read.csv("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/sample-details/sample_table.csv")
+patani <- patani[!patani$cellline == "ctrl2",] # remove CTRL2 samples due to batch effects
+patani$cellline <- patani$cellline %>% gsub("ctrl5", "ctrl2", .) # for the paper we rename ctrl5 as ctrl2 to avoid confusion as to why we have ctrl1 & 5 (but not 2,3 and 4)
+patani <- patani %>% distinct(fraction_cellline, .keep_all = TRUE) # remove rows for technical repeats
+patani <- patani %>% mutate(mutation = as.factor(vcp), fraction = factor(fraction, levels = c("whole", "nuclear", "cytoplasmic")))
+patani$condition <- gsub("vcp", "als", patani$mutation)
+patani$condition <- factor(patani$condition, levels = c("ctrl", "als")) # set the reference control first to ensure comparison is ALS vs CTRL (rather than CTRL vs ALS)
+patani$sample <- patani$fraction_cellline %>% gsub("whole", "who", .) %>% gsub("nuclear", "nuc", .) %>% gsub("cytoplasmic", "cyt", .) #%>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .)
+patani$sample <- paste("ac_",patani$sample,sep="")
+patani$patient <- patani$cellline %>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .)
+patani <- patani %>% dplyr::filter(fraction == "nuclear") # astrocyte whole-cell samples for VCP only
+sampleTable <- patani %>% dplyr::select(sampleName=fraction_cellline, condition, fraction, mutation, cellline, patient, sample) %>% mutate(fileName = paste(sample, ".tab", sep = ""), patient_fraction = paste(patient, fraction, sep = "_")) %>% dplyr::select(sampleName, fileName, condition, everything())
+htseqdir <- "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/alignment/htseq"
+dds <- DESeqDataSetFromHTSeqCount(sampleTable = sampleTable, 
+                                            directory = htseqdir, 
+                                            design = ~ condition) # create DESeqDataSet with this design - Import htseq .tab tables
+dds <- DESeq(dds) # run DESeq2
+resultsNames(dds)
+res <- DESeq2::results(dds, name = "condition_als_vs_ctrl") # Astrocyte ALS vs CTRL
+gene2ens_filtered <-  filter(gene2ens, gene_id %in% rownames(res)) %>% unique # filter gene to ensID to only ENS names in the results tibble
+res <- res %>% as_tibble(rownames = "ensID") %>% left_join(gene2ens_filtered, by=c("ensID"="gene_id")) %>% arrange(padj) # join gene gene_nameS to res tibble & order by padj
+readr::write_csv(res, path=paste("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/deseq_results_ac_nuc_vcp_vs_ctrl.csv", sep = "")) # save results as CSV
+vsd <- vst(dds, blind=FALSE) # VST transformation
+saveRDS(res, "/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/res_ac_nuc_vcp_vs_ctrl.RDS")
+saveRDS(dds, "/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/dds_ac_nuc_vcp_vs_ctrl.RDS")
+saveRDS(vsd, "/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/vsd_ac_nuc_vcp_vs_ctrl.RDS")
+```
+
+## Cytoplasmic VCP vs CTRL
+
+```{r}
+patani <- read.csv("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/sample-details/sample_table.csv")
+patani <- patani[!patani$cellline == "ctrl2",] # remove CTRL2 samples due to batch effects
+patani$cellline <- patani$cellline %>% gsub("ctrl5", "ctrl2", .) # for the paper we rename ctrl5 as ctrl2 to avoid confusion as to why we have ctrl1 & 5 (but not 2,3 and 4)
+patani <- patani %>% distinct(fraction_cellline, .keep_all = TRUE) # remove rows for technical repeats
+patani <- patani %>% mutate(mutation = as.factor(vcp), fraction = factor(fraction, levels = c("whole", "nuclear", "cytoplasmic")))
+patani$condition <- gsub("vcp", "als", patani$mutation)
+patani$condition <- factor(patani$condition, levels = c("ctrl", "als")) # set the reference control first to ensure comparison is ALS vs CTRL (rather than CTRL vs ALS)
+patani$sample <- patani$fraction_cellline %>% gsub("whole", "who", .) %>% gsub("nuclear", "nuc", .) %>% gsub("cytoplasmic", "cyt", .) #%>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .)
+patani$sample <- paste("ac_",patani$sample,sep="")
+patani$patient <- patani$cellline %>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .)
+patani <- patani %>% dplyr::filter(fraction == "cytoplasmic") # astrocyte whole-cell samples for VCP only
+sampleTable <- patani %>% dplyr::select(sampleName=fraction_cellline, condition, fraction, mutation, cellline, patient, sample) %>% mutate(fileName = paste(sample, ".tab", sep = ""), patient_fraction = paste(patient, fraction, sep = "_")) %>% dplyr::select(sampleName, fileName, condition, everything())
+htseqdir <- "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/alignment/htseq"
+dds <- DESeqDataSetFromHTSeqCount(sampleTable = sampleTable, 
+                                            directory = htseqdir, 
+                                            design = ~ condition) # create DESeqDataSet with this design - Import htseq .tab tables
+dds <- DESeq(dds) # run DESeq2
+resultsNames(dds)
+res <- DESeq2::results(dds, name = "condition_als_vs_ctrl") # Astrocyte ALS vs CTRL
+gene2ens_filtered <-  filter(gene2ens, gene_id %in% rownames(res)) %>% unique # filter gene to ensID to only ENS names in the results tibble
+res <- res %>% as_tibble(rownames = "ensID") %>% left_join(gene2ens_filtered, by=c("ensID"="gene_id")) %>% arrange(padj) # join gene gene_nameS to res tibble & order by padj
+readr::write_csv(res, path=paste("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/deseq_results_ac_cyt_vcp_vs_ctrl.csv", sep = "")) # save results as CSV
+vsd <- vst(dds, blind=FALSE) # VST transformation
+saveRDS(res, "/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/res_ac_cyt_vcp_vs_ctrl.RDS")
+saveRDS(dds, "/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/dds_ac_cyt_vcp_vs_ctrl.RDS")
+saveRDS(vsd, "/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/vsd_ac_cyt_vcp_vs_ctrl.RDS")
+```
+
+
+## VCP Cyt vs Nuc
+
+```{r}
+patani <- read.csv("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/sample-details/sample_table.csv")
+patani <- patani[!patani$cellline == "ctrl2",] # remove CTRL2 samples due to batch effects
+patani$cellline <- patani$cellline %>% gsub("ctrl5", "ctrl2", .) # for the paper we rename ctrl5 as ctrl2 to avoid confusion as to why we have ctrl1 & 5 (but not 2,3 and 4)
+patani <- patani %>% distinct(fraction_cellline, .keep_all = TRUE) # remove rows for technical repeats
+patani <- patani %>% mutate(mutation = as.factor(vcp), fraction = factor(fraction, levels = c("whole", "nuclear", "cytoplasmic")))
+patani$condition <- gsub("vcp", "als", patani$mutation)
+patani$condition <- factor(patani$condition, levels = c("ctrl", "als")) # set the reference control first to ensure comparison is ALS vs CTRL (rather than CTRL vs ALS)
+patani$sample <- patani$fraction_cellline %>% gsub("whole", "who", .) %>% gsub("nuclear", "nuc", .) %>% gsub("cytoplasmic", "cyt", .) #%>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .)
+patani$sample <- paste("ac_",patani$sample,sep="")
+patani$patient <- patani$cellline %>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .)
+patani <- patani %>% dplyr::filter(fraction != "whole" & mutation == "vcp")
+sampleTable <- patani %>% dplyr::select(sampleName=fraction_cellline, condition, fraction, mutation, cellline, patient, sample) %>% mutate(fileName = paste(sample, ".tab", sep = ""), patient_fraction = paste(patient, fraction, sep = "_")) %>% dplyr::select(sampleName, fileName, condition, everything())
+htseqdir <- "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/alignment/htseq"
+dds <- DESeqDataSetFromHTSeqCount(sampleTable = sampleTable, 
+                                            directory = htseqdir, 
+                                            design = ~ fraction) # create DESeqDataSet with this design - Import htseq .tab tables
+dds <- DESeq(dds) # run DESeq2
+resultsNames(dds)
+res <- DESeq2::results(dds, name = "fraction_cytoplasmic_vs_nuclear") # Astrocyte cyt vs nuc
+gene2ens_filtered <-  filter(gene2ens, gene_id %in% rownames(res)) %>% unique # filter gene to ensID to only ENS names in the results tibble
+res <- res %>% as_tibble(rownames = "ensID") %>% left_join(gene2ens_filtered, by=c("ensID"="gene_id")) %>% arrange(padj) # join gene gene_nameS to res tibble & order by padj
+readr::write_csv(res, path=paste("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/deseq_res_ac_vcp_cyt_vs_nuc.csv", sep = "")) # save results as CSV
+vsd <- vst(dds, blind=FALSE) # VST transformation
+saveRDS(res, "/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/res_ac_vcp_cyt_vs_nuc.RDS")
+saveRDS(dds, "/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/dds_ac_vcp_cyt_vs_nuc.RDS")
+saveRDS(vsd, "/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/vsd_ac_vcp_cyt_vs_nuc.RDS")
+```
+
+## CTRL Cyt vs Nuc
+
+```{r}
+patani <- read.csv("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/sample-details/sample_table.csv")
+patani <- patani[!patani$cellline == "ctrl2",] # remove CTRL2 samples due to batch effects
+patani$cellline <- patani$cellline %>% gsub("ctrl5", "ctrl2", .) # for the paper we rename ctrl5 as ctrl2 to avoid confusion as to why we have ctrl1 & 5 (but not 2,3 and 4)
+patani <- patani %>% distinct(fraction_cellline, .keep_all = TRUE) # remove rows for technical repeats
+patani <- patani %>% mutate(mutation = as.factor(vcp), fraction = factor(fraction, levels = c("whole", "nuclear", "cytoplasmic")))
+patani$condition <- gsub("vcp", "als", patani$mutation)
+patani$condition <- factor(patani$condition, levels = c("ctrl", "als")) # set the reference control first to ensure comparison is ALS vs CTRL (rather than CTRL vs ALS)
+patani$sample <- patani$fraction_cellline %>% gsub("whole", "who", .) %>% gsub("nuclear", "nuc", .) %>% gsub("cytoplasmic", "cyt", .) #%>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .)
+patani$sample <- paste("ac_",patani$sample,sep="")
+patani$patient <- patani$cellline %>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .)
+patani <- patani %>% dplyr::filter(fraction != "whole" & mutation == "ctrl")
+sampleTable <- patani %>% dplyr::select(sampleName=fraction_cellline, condition, fraction, mutation, cellline, patient, sample) %>% mutate(fileName = paste(sample, ".tab", sep = ""), patient_fraction = paste(patient, fraction, sep = "_")) %>% dplyr::select(sampleName, fileName, condition, everything()) 
+htseqdir <- "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/alignment/htseq"
+dds <- DESeqDataSetFromHTSeqCount(sampleTable = sampleTable, 
+                                            directory = htseqdir, 
+                                            design = ~ fraction) # create DESeqDataSet with this design - Import htseq .tab tables
+dds <- DESeq(dds) # run DESeq2
+resultsNames(dds)
+res <- DESeq2::results(dds, name = "fraction_cytoplasmic_vs_nuclear") # Astrocyte cyt vs nuc
+gene2ens_filtered <-  filter(gene2ens, gene_id %in% rownames(res)) %>% unique # filter gene to ensID to only ENS names in the results tibble
+res <- res %>% as_tibble(rownames = "ensID") %>% left_join(gene2ens_filtered, by=c("ensID"="gene_id")) %>% arrange(padj) # join gene gene_nameS to res tibble & order by padj
+readr::write_csv(res, path=paste("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/deseq_results_ac_ctrl_cyt_vs_nuc.csv", sep = "")) # save results as CSV
+vsd <- vst(dds, blind=FALSE) # VST transformation
+saveRDS(res, "/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/res_ac_ctrl_cyt_vs_nuc.RDS")
+saveRDS(dds, "/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/dds_ac_ctrl_cyt_vs_nuc.RDS")
+saveRDS(vsd, "/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/deseq2/vsd_ac_ctrl_cyt_vs_nuc.RDS")
+```
+
+## Transcript-level analysis Kallisto
+
+
+```{r}
+kallistodir <- "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/alignment/kallisto"
+patani <- read.csv("/camp/home/ziffo/home/projects/astrocyte-fractionation-bulk-rnaseq/sample-details/sample_table.csv") %>% filter(cellline != "ctrl2") %>% distinct(fraction_cellline, .keep_all = TRUE)
+patani$cellline <- gsub("ctrl5", "ctrl2", patani$cellline) 
+patani$sample <- gsub("whole", "who", patani$fraction_cellline) %>% gsub("nuclear", "nuc", .) %>% gsub("cytoplasmic", "cyt", .) #%>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .)
+patani$sample <- paste("ac_",patani$sample,sep="")
+patani$patient <- patani$cellline %>% gsub("cb1e", "R191Q", .) %>% gsub("glia", "R155C", .)
+patani <- patani %>% dplyr::select(sampleName = sample, fileName = fraction_cellline, fraction, vcp, cellline, patient) %>% mutate(vcp = factor(vcp, levels = c("ctrl", "vcp")), fraction = factor(fraction, levels = c("nuclear", "cytoplasmic", "whole")))
+
+patani.nuc <- patani %>% filter(fraction == "nuclear")
+patani.nuc.files <- paste("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/alignment/kallisto/", patani.nuc$fileName, "/abundance.h5", sep = "")
+names(patani.nuc.files) <- patani.nuc$sampleName 
+all(file.exists(patani.nuc.files))
+patani.nuc.txi <- tximport(patani.nuc.files, type = "kallisto", txOut = TRUE)
+dds.patani.nuc <- DESeqDataSetFromTximport(txi = patani.nuc.txi, colData = patani.nuc, design = ~ vcp)
+dds.patani.nuc <- DESeq(dds.patani.nuc) # run DESeq2
+resultsNames(dds.patani.nuc)
+res.patani.nuc <- DESeq2::results(dds.patani.nuc, name = "vcp_vcp_vs_ctrl")
+rownames(res.patani.nuc) <- gsub("[.].*","", rownames(res.patani.nuc)) # remove .XX from ensembl gene ID for gene ontology - for kallisto only
+trans2gene.patani.nuc <-  filter(trans2gene, transcript_id %in% rownames(res.patani.nuc)) # filter gene to ensID to only ENS names in the results tibble
+res.patani.nuc <- res.patani.nuc %>% as_tibble(rownames = "transcript_id") %>% left_join(trans2gene.patani.nuc, by=c("transcript_id")) %>% arrange(padj) 
+# transcript_biotype <- import("/camp/home/ziffo/home/genomes/ensembl/Homo_sapiens.GRCh38.99.chr_patch_hapl_scaff.gtf") %>% as.data.frame() %>% dplyr::select(transcript_id, transcript_biotype) %>% unique()
+res.patani.nuc <- res.patani.nuc %>% left_join(transcript_biotype, by = "transcript_id") %>% 
+  mutate(nmd_transcript = case_when(transcript_biotype == "nonsense_mediated_decay" ~ "NMD tx", transcript_biotype == "protein_coding" ~ "non NMD tx", TRUE ~ "NA"))
+table(res.patani.nuc$transcript_biotype)
+table(res.patani.nuc$nmd_transcript)
+
+patani.cyt <- patani %>% filter(fraction == "cytoplasmic")
+patani.cyt.files <- paste("/camp/home/ziffo/home/projects/astrocyte-meta-analysis/alignment/kallisto/", patani.cyt$fileName, "/abundance.h5", sep = "")
+names(patani.cyt.files) <- patani.cyt$sampleName 
+all(file.exists(patani.cyt.files))
+patani.cyt.txi <- tximport(patani.cyt.files, type = "kallisto", txOut = TRUE)
+dds.patani.cyt <- DESeqDataSetFromTximport(txi = patani.cyt.txi, colData = patani.cyt, design = ~ vcp)
+dds.patani.cyt <- DESeq(dds.patani.cyt) # run DESeq2
+resultsNames(dds.patani.cyt)
+res.patani.cyt <- DESeq2::results(dds.patani.cyt, name = "vcp_vcp_vs_ctrl")
+rownames(res.patani.cyt) <- gsub("[.].*","", rownames(res.patani.cyt)) # remove .XX from ensembl gene ID for gene ontology - for kallisto only
+trans2gene.patani.cyt <-  filter(trans2gene, transcript_id %in% rownames(res.patani.cyt)) # filter gene to ensID to only ENS names in the results tibble
+res.patani.cyt <- res.patani.cyt %>% as_tibble(rownames = "transcript_id") %>% left_join(trans2gene.patani.cyt, by=c("transcript_id")) %>% arrange(padj) 
+res.patani.cyt <- res.patani.cyt %>% left_join(transcript_biotype, by = "transcript_id") %>% 
+  mutate(nmd_transcript = case_when(transcript_biotype == "nonsense_mediated_decay"~ "NMD tx", transcript_biotype == "protein_coding" ~ "non NMD tx", TRUE ~ "NA"))
+table(res.patani.cyt$nmd_transcript)
+
+res.patani.nuc.nmd <- res.patani.nuc %>% mutate(fraction = "nuclear")
+res.patani.cyt.nmd <- res.patani.cyt %>% mutate(fraction = "cytoplasmic")
+res.patani.nmd <- bind_rows(res.patani.nuc.nmd, res.patani.cyt.nmd)# %>% filter(nmd_transcript != "NA")
+saveRDS(res.patani.nmd, "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/expression/deseq2/kallisto_ac_nuc_cyt_ctrl_vcp.rds")
+```
+
+# Tyzack SOD1 vs CTRL
+
+```{r}
+tyzack <- read_excel("/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-ipsc-tyzack-2017/sample-details/metadata.xlsx")
+tyzack <- tyzack %>% distinct(sample, .keep_all = TRUE)
+tyzack <- tyzack %>% mutate(mutation = factor(condition, levels = c("ctrl", "sod1")),
+                            filename = sample,
+                            fraction = "whole")
+tyzack$sample <- paste("ac_tyz_",tyzack$sample,sep="")
+tyzack$condition <- gsub("sod1", "als", tyzack$mutation)
+tyzack$condition <- factor(tyzack$condition, levels = c("ctrl", "als")) # set the reference control first to ensure comparison is ALS vs CTRL (rather than CTRL vs ALS)
+tyzack$cellline <- c("1","2","sod1")
+tyzack$patient <- c("1","2","sod1")
+sampleTable <- tyzack %>% dplyr::select(sampleName=sample, filename, condition, fraction, mutation, cellline, patient) %>% mutate(fileName = paste(sampleName, ".tab", sep = "")) %>% dplyr::select(sampleName, fileName, condition, everything()) %>% as.data.frame
+
+htseqdir <- "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/alignment/htseq"
+dds <- DESeqDataSetFromHTSeqCount(sampleTable = sampleTable, 
+                                            directory = htseqdir, 
+                                            design = ~ condition) # create DESeqDataSet with this design - Import htseq .tab tables
+dds <- DESeq(dds) # run DESeq2
+resultsNames(dds)
+res <- DESeq2::results(dds, name = "condition_als_vs_ctrl") # Astrocyte cyt vs nuc
+gene2ens_filtered <-  filter(gene2ens, gene_id %in% rownames(res)) %>% unique # filter gene to ensID to only ENS names in the results tibble
+res <- res %>% as_tibble(rownames = "ensID") %>% left_join(gene2ens_filtered, by=c("ensID"="gene_id")) %>% arrange(padj) # join gene gene_nameS to res tibble & order by padj
+readr::write_csv(res, path=paste("/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-ipsc-tyzack-2017/expression/deseq2/deseq_results_ac_tyz_sod1_vs_ctrl.csv", sep = "")) # save results as CSV
+vsd <- vst(dds, blind=FALSE) # VST transformation
+saveRDS(res, "/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-ipsc-tyzack-2017/expression/deseq2/res_ac_tyz_sod1_vs_ctrl.RDS")
+saveRDS(dds, "/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-ipsc-tyzack-2017/expression/deseq2/dds_ac_tyz_sod1_vs_ctrl.RDS")
+saveRDS(vsd, "/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-ipsc-tyzack-2017/expression/deseq2/vsd_ac_tyz_sod1_vs_ctrl.RDS")
+```
+
+# Birger C9orf72 vs CTRL
+
+```{r}
+birger <- read_excel("/camp/home/ziffo/home/downloaded-public-data/astrocyte-c9orf72-ipsc-birger-2019/sample-details/metadata.xlsx")
+birger$condition <- birger$condition %>% gsub("control", "ctrl", .)
+birger <- birger %>% mutate(sample = factor(sample, levels = c("control_L3", "control_L9", "C9orf72_L5", "C9orf72_L8")), 
+                            mutation = factor(condition, levels = c("ctrl", "C9orf72")),
+                            filename = sample,
+                            fraction = "whole")
+birger$sample <- birger$sample %>% gsub("control_L", "ctrl", .) %>% gsub("C9orf72_L", "C9orf", .)
+birger$sample <- paste("ac_bir_",birger$sample,sep="")
+birger$condition <- gsub("C9orf72", "als", birger$mutation)
+birger$condition <- factor(birger$condition, levels = c("ctrl", "als")) # set the reference control first to ensure comparison is ALS vs CTRL (rather than CTRL vs ALS)
+birger$patient <- birger$cell_line
+sampleTable <- birger %>% dplyr::select(sampleName=sample, filename, condition, fraction, mutation, cellline = cell_line, patient) %>% mutate(fileName = paste(sampleName, ".tab", sep = "")) %>% dplyr::select(sampleName, fileName, condition, everything()) %>% as.data.frame
+htseqdir <- "/camp/home/ziffo/home/projects/astrocyte-meta-analysis/alignment/htseq"
+dds <- DESeqDataSetFromHTSeqCount(sampleTable = sampleTable, 
+                                            directory = htseqdir, 
+                                            design = ~ condition) # create DESeqDataSet with this design - Import htseq .tab tables
+dds <- DESeq(dds) # run DESeq2
+resultsNames(dds)
+res <- DESeq2::results(dds, name = "condition_als_vs_ctrl") # Astrocyte cyt vs nuc
+gene2ens_filtered <-  filter(gene2ens, gene_id %in% rownames(res)) %>% unique # filter gene to ensID to only ENS names in the results tibble
+res <- res %>% as_tibble(rownames = "ensID") %>% left_join(gene2ens_filtered, by=c("ensID"="gene_id")) %>% arrange(padj) # join gene gene_nameS to res tibble & order by padj
+readr::write_csv(res, path=paste("/camp/home/ziffo/home/downloaded-public-data/astrocyte-c9orf72-ipsc-birger-2019/expression/deseq2/deseq_results_ac_bir_c9orf_vs_ctrl.csv", sep = "")) # save results as CSV
+vsd <- vst(dds, blind=FALSE) # VST transformation
+saveRDS(res, "/camp/home/ziffo/home/downloaded-public-data/astrocyte-c9orf72-ipsc-birger-2019/expression/deseq2/res_ac_bir_c9orf_vs_ctrl.RDS")
+saveRDS(dds, "/camp/home/ziffo/home/downloaded-public-data/astrocyte-c9orf72-ipsc-birger-2019/expression/deseq2/dds_ac_bir_c9orf_vs_ctrl.RDS")
+saveRDS(vsd, "/camp/home/ziffo/home/downloaded-public-data/astrocyte-c9orf72-ipsc-birger-2019/expression/deseq2/vsd_ac_bir_c9orf_vs_ctrl.RDS")
+```
+
+
+# Reactive astrocytes Barbar et al
+
+```{r}
+barbar <- read_excel("/camp/home/ziffo/home/downloaded-public-data/reactive-astrocyte-barbar-2020/sample-details/sample_table.xls")
+htseqdir="/camp/home/ziffo/home/downloaded-public-data/reactive-astrocyte-barbar-2020/alignment/htseq/"
+sampleTable <- barbar %>% mutate(sampleName = sample, # set the reference control first
+                            fileName = paste(sampleName, ".tab", sep = ""),
+                            condition = factor(reactivity, levels = c("A0", "A1"))) %>% 
+  dplyr::select(sampleName, fileName, condition) %>% as.data.frame
+dds <- DESeqDataSetFromHTSeqCount(sampleTable = sampleTable, 
+                                            directory = htseqdir, 
+                                            design = ~ condition) # create DESeqDataSet with this design - Import htseq .tab tables
+dds <- DESeq(dds) # run DESeq2
+resultsNames(dds)
+res <- DESeq2::results(dds, name = "condition_A1_vs_A0")
+gene2ens_filtered <-  filter(gene2ens, gene_id %in% rownames(res)) %>% unique # filter gene to ensID to only ENS names in the results tibble
+res <- res %>% as_tibble(rownames = "ensID") %>% left_join(gene2ens_filtered, by=c("ensID"="gene_id")) %>% arrange(padj) # join gene gene_nameS to res tibble & order by padj
+readr::write_csv(res, path=paste("/camp/home/ziffo/home/downloaded-public-data/reactive-astrocyte-barbar-2020/expression/deseq/deseq_results_barbar_a1_vs_a0.csv", sep = "")) # save results as CSV
+vsd <- vst(dds, blind=FALSE) # VST transformation
+saveRDS(res, "/camp/home/ziffo/home/downloaded-public-data/reactive-astrocyte-barbar-2020/expression/deseq/res_ac_bar_a1_vs_a0.RDS")
+saveRDS(dds, "/camp/home/ziffo/home/downloaded-public-data/reactive-astrocyte-barbar-2020/expression/deseq/dds_ac_bar_a1_vs_a0.RDS")
+saveRDS(vsd, "/camp/home/ziffo/home/downloaded-public-data/reactive-astrocyte-barbar-2020/expression/deseq/vsd_ac_bar_a1_vs_a0.RDS")
+```
+
+# TDP43 depleted astrocytes Peng et al
+
+```{r}
+peng <- read_excel("/camp/home/ziffo/home/downloaded-public-data/astrocyte-tdp43-mouse-peng-2020/sample-details/metadata.xlsx")
+htseqdir="/camp/home/ziffo/home/downloaded-public-data/astrocyte-tdp43-mouse-peng-2020/alignment/htseq/"
+peng <- peng %>% mutate(sampleName = sample, 
+                            fileName = paste(sampleName, ".tab", sep = ""),
+                            condition = factor(group, levels = c("ac_tdp_ctrl", "ac_tdp_het", "ac_tdp_ko"))) %>%  # set the reference control first
+  dplyr::select(sampleName, fileName, condition) %>% as.data.frame
+dds <- DESeqDataSetFromHTSeqCount(sampleTable = peng, 
+                                            directory = htseqdir, 
+                                            design = ~ condition) # create DESeqDataSet with this design - Import htseq .tab tables
+dds <- DESeq(dds) # run DESeq2
+vsd <- vst(dds, blind=FALSE)
+resultsNames(dds)
+res <- DESeq2::results(dds, name = "condition_ac_tdp_ko_vs_ac_tdp_ctrl")
+mus.musculus.gene2ens <- readRDS("/camp/home/ziffo/home/genomes/ensembl/Mus_musculus.GRCm38.101.gene2ens.RDS")
+gene2ens_filtered <-  filter(mus.musculus.gene2ens, gene_id %in% rownames(res)) %>% unique # filter gene to ensID to only ENS names in the results tibble
+res <- res %>% as_tibble(rownames = "ensID") %>% left_join(gene2ens_filtered, by=c("ensID"="gene_id")) %>% arrange(padj) %>% #join gene gene_nameS to res tibble & order by padj
+        mutate(gene_name = toupper(gene_name)) # make gene names upper case - needed fir Musmuscularis for matching to GO terms
+readr::write_csv(res, path=paste("/camp/home/ziffo/home/downloaded-public-data/astrocyte-tdp43-mouse-peng-2020/expression/deseq/deseq_results_ko_vs_ctrl.csv", sep = "")) # save results as CSV
+saveRDS(res, "/camp/home/ziffo/home/downloaded-public-data/astrocyte-tdp43-mouse-peng-2020/expression/deseq/res_ac_tdp_ko_vs_ctrl.RDS")
+saveRDS(dds, "/camp/home/ziffo/home/downloaded-public-data/astrocyte-tdp43-mouse-peng-2020/expression/deseq/dds_ac_tdp_ko_vs_ctrl.RDS")
+saveRDS(vsd, "/camp/home/ziffo/home/downloaded-public-data/astrocyte-tdp43-mouse-peng-2020/expression/deseq/vsd_ac_tdp_ko_vs_ctrl.RDS")
+```
+
+# bacTRAP SOD1 Astrocytes Sun, Cleveland et al
+
+```{r}
+cleveland <- read_excel("/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-mouse-bacTRAP-cleveland-2015/sample-details/metadata.xlsx")
+htseqdir="/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-mouse-bacTRAP-cleveland-2015/alignment/htseq/"
+sampleTable <- cleveland %>% mutate(sampleName = sample, 
+                            fileName = paste(sampleName, ".tab", sep = ""),
+                            condition = factor(condition, levels = c("ctrl", "sod1"))) %>%  # set the reference control first
+  dplyr::select(sampleName, fileName, condition) %>% as.data.frame
+dds <- DESeqDataSetFromHTSeqCount(sampleTable = sampleTable, 
+                                            directory = htseqdir, 
+                                            design = ~ condition) # create DESeqDataSet with this design - Import htseq .tab tables
+dds <- DESeq(dds) # run DESeq2
+vsd <- vst(dds, blind=FALSE) # VST transformation
+resultsNames(dds)
+res <- DESeq2::results(dds, name = "condition_sod1_vs_ctrl")
+mus.musculus.gene2ens <- readRDS("/camp/home/ziffo/home/genomes/ensembl/Mus_musculus.GRCm38.101.gene2ens.RDS")
+gene2ens_filtered <-  filter(mus.musculus.gene2ens, gene_id %in% rownames(res)) %>% unique # filter gene to ensID to only ENS names in the results tibble
+res <- res %>% as_tibble(rownames = "ensID") %>% left_join(gene2ens_filtered, by=c("ensID"="gene_id")) %>% arrange(padj) %>% #join gene gene_nameS to res tibble & order by padj
+        mutate(gene_name = toupper(gene_name)) # make gene names upper case - needed fir Musmuscularis for matching to GO terms
+readr::write_csv(res, path=paste("/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-mouse-bacTRAP-cleveland-2015/expression/deseq/deseq_results_mouse_sod1_vs_ctrl.csv", sep = "")) # save results as CSV
+saveRDS(res, "/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-mouse-bacTRAP-cleveland-2015/expression/deseq/res_ac_mou_sod1_vs_ctrl.RDS")
+saveRDS(dds, "/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-mouse-bacTRAP-cleveland-2015/expression/deseq/dds_ac_mou_sod1_vs_ctrl.RDS")
+saveRDS(vsd, "/camp/home/ziffo/home/downloaded-public-data/astrocyte-sod1-mouse-bacTRAP-cleveland-2015/expression/deseq/vsd_ac_mou_sod1_vs_ctrl.RDS")
+```
