@@ -2,7 +2,7 @@
 
 This repository contains scripts to analyse the data and reproduce the figures from the paper:
 
-[Reactive astrocytes in ALS display diminished intron retention](biorxiv)
+[Reactive astrocytes in ALS display diminished intron retention](https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkab115/6155937)
 Oliver J. Ziff, Doaa M. Taha, Hamish Crerar, Benjamin E. Clarke, Anob M. Chakrabarti, Gavin Kelly, Jacob Neeves, Giulia Tyzack, Nicholas M. Luscombe, Rickie Patani
 
 The scripts are written in Rmarkdown documents for readability and are organised in order of the Figures in the paper.
